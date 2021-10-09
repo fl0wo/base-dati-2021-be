@@ -29,9 +29,9 @@ The BE and BD components will be placed in the remote OVH private server, but th
 
 ## Init in localhost : 
 
-You should have installed Docker[https://docs.docker.com/get-docker/] in your local machine.
+You should have installed Docker [here](https://docs.docker.com/get-docker/) in your local machine.
 
-And also docker-compose[https://docs.docker.com/compose/install/].
+And also docker-compose [here](https://docs.docker.com/compose/install/).
 
 Before proceeding with the build and run of the project be carefull on setting correctly the POSTGRES_HOST env variable inside the Dockerfile file.
 
@@ -66,7 +66,7 @@ docker container logs -f {id}
 ### End
 
 Now you can interact with the rest-application server with Postman, for example : 
-
+```
 curl --location --request POST 'http://127.0.0.1:5000/add' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -74,5 +74,8 @@ curl --location --request POST 'http://127.0.0.1:5000/add' \
     "price" : 3000,
     "breed" : "type"
 }'
+```
 
+```
 curl --location --request GET 'localhost:5000/'
+```
