@@ -1,0 +1,20 @@
+# FOR EDUCATIONAL PURPOSE (not working)
+FROM python:3.8
+LABEL maintainer="Florian Sabani"
+COPY ./requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+
+ENV POSTGRES_USER=test
+ENV POSTGRES_PASSWORD=password
+ENV POSTGRES_HOST=postgres
+ENV POSTGRES_PORT=5432
+ENV POSTGRES_DB=example
+
+ENV FLASK_APP=src/example/app.py
+ENV FLASK_RUN_HOST=0.0.0.0
+FLASK_RUN_PORT=5000
+
+EXPOSE 5000
+
+CMD [ "flask", "run" ]
