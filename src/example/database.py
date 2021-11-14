@@ -29,5 +29,10 @@ def get_by_id(model, id):
     return data
 
 
+def get_by_email(model, email):
+    data = model.query.filter_by(email=email).first()
+    return data
+
+
 def commit_changes():
     db.session.commit()

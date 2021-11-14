@@ -1,6 +1,6 @@
 import json
 
-from flask import request
+from flask import current_app, flash, jsonify, make_response, redirect, request, url_for
 
 from . import create_app, database
 from .models import Cats, Users
@@ -14,6 +14,7 @@ import datetime
 from functools import wraps
 
 app = create_app()
+
 
 @app.route('/', methods=['GET'])
 def fetch():
@@ -64,3 +65,23 @@ def signup_user():
 
     database.add_instance(Users, id=str(uuid.uuid4()), email=data['email'], password=hashed_password)
     return jsonify({'message': 'registered successfully'})
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login_user():
+    auth = request.authorization
+
+    if not auth or not auth.username or not auth.password:
+        return make_response('could not verify', 401, {'Authentication': 'Basic realm: "login required"'})
+
+    user = database.get_by_email(Users, auth.username)
+
+    if check_password_hash(user.password, auth.password):
+        token = jwt.encode({
+            'id': user.id,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
+            app.config['SECRET_KEY']
+        )
+        return jsonify({'token': token.encode().decode('UTF-8')})
+
+    return make_response('could not verify', 401, {'WWW.Authentication': 'Basic realm: "login required"'})

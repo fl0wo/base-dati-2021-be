@@ -26,7 +26,7 @@ class Users(db.Model):
     phone = db.Column("phone", db.String(50), nullable=True)
     role = db.Column("role", db.String(50), nullable=True)
     email = db.Column("email", db.String(50), nullable=False)
-    password = db.Column("password", db.String(100), nullable=False)
+    password = db.Column("password", db.String(1000), nullable=False)
 
 
 class Subscriptions(db.Model):

@@ -13,7 +13,7 @@ from .models import Users
 # si prende f e la decora concatenando new checktoken fun
 def token_required(f):
     @wraps(f)
-    def decorator(*args, **kwargs):
+    def dec(*args, **kwargs):
 
         token = None
 
@@ -31,4 +31,4 @@ def token_required(f):
 
         return f(current_user, *args, **kwargs)
 
-    return decorator
+    return dec
