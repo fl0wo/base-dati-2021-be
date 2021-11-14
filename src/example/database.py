@@ -24,5 +24,10 @@ def edit_instance(model, id, **kwargs):
     commit_changes()
 
 
+def get_by_id(model, id):
+    data = model.query.filter_by(id=id).first()
+    return data
+
+
 def commit_changes():
     db.session.commit()

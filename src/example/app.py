@@ -3,10 +3,17 @@ import json
 from flask import request
 
 from . import create_app, database
-from .models import Cats
+from .models import Cats, Users
+from .security import token_required
+
+from werkzeug.security import generate_password_hash, \
+    check_password_hash  # not constant due to salt adding (guarda rainbow table attack)
+import uuid
+import jwt
+import datetime
+from functools import wraps
 
 app = create_app()
-
 
 @app.route('/', methods=['GET'])
 def fetch():
@@ -47,3 +54,13 @@ def edit(cat_id):
     new_price = data['price']
     database.edit_instance(Cats, id=cat_id, price=new_price)
     return json.dumps("Edited"), 200
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def signup_user():
+    data = request.get_json()
+
+    hashed_password = generate_password_hash(data['password'], method='sha256')
+
+    database.add_instance(Users, id=str(uuid.uuid4()), email=data['email'], password=hashed_password)
+    return jsonify({'message': 'registered successfully'})
