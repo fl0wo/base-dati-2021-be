@@ -43,7 +43,7 @@ Command line for the PostgreSQL docker container :
 
 In the same folder of docker-compose.yml run : 
 ```
-docker-compose up
+docker-compose up -d
 ```
 
 To see the image and container you just created :
