@@ -1,23 +1,18 @@
 import flask_sqlalchemy
 import sqlalchemy
 
+from .lowdb import create_schema
+
 from sqlalchemy import (
     create_engine, Column, Integer, String, Numeric,
-    CheckConstraint, UniqueConstraint, ForeignKeyConstraint
+    CheckConstraint, UniqueConstraint, ForeignKeyConstraint,
+    Table, Column, Integer, String, DDL
 )
 
-from sqlalchemy import MetaData, Table, Column, Integer, String, DDL
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.schema import CreateTable
-
-from sqlalchemy import event
-from sqlalchemy.schema import CreateSchema
-from . import config
+create_schema("gym")
 
 db = flask_sqlalchemy.SQLAlchemy()
 
-engine = sqlalchemy.create_engine(config.DATABASE_CONNECTION_URI)
-engine.execute(DDL("CREATE SCHEMA IF NOT EXISTS gym"))
 ID_TYPE = db.String(36)
 
 
