@@ -9,6 +9,8 @@ DECLARE
         SELECT * INTO trainer_row
         FROM "gym".users u
         WHERE u.id=NEW.trainer;
+        -- TODO: use this method
+        -- return safeReturn(trainer_row.role=='trainer',NEW);
 
         IF trainer_row.role=='trainer' THEN
             RETURN NEW;
