@@ -40,12 +40,13 @@ DECLARE
         WHERE slot.id=NEW.slot;
 
         SELECT COUNT(*) INTO current_occupation
-        FROM "gym".weigthroom_reservations wr
+        FROM "gym".weight_room_reservations wr
         WHERE wr.slot = NEW.slot;
 
-        IF current_occupation+1>slot_row.max_capacity THEN
-            DELETE FROM "gym".reservations r
-            WHERE r.reservation_id = NEW.reservation_id;
+        IF current_occupation>=slot_row.max_capacity THEN
+    --   TODO: use rollback instead
+    --    DELETE FROM "gym".reservations r
+    --    WHERE r.id = NEW.reservation_id;
             RETURN NULL;
         ELSE
             RETURN NEW;
@@ -53,11 +54,11 @@ DECLARE
     END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS is_slot_full ON "gym".weigthroom_reservations;
+DROP TRIGGER IF EXISTS is_slot_full ON "gym".weight_room_reservations;
 CREATE TRIGGER is_slot_full
-BEFORE INSERT OR UPDATE ON "gym".weigthroom_reservations
+BEFORE INSERT OR UPDATE ON "gym".weight_room_reservations
 FOR EACH ROW
-EXECUTE FUNCTION "gym".is_slot_full_fun()
+EXECUTE FUNCTION "gym".is_slot_full_fun();
 
 --Controlla che le prenotazioni per le lezioni non siano al limite per una detterminata lezione
 CREATE OR REPLACE FUNCTION "gym".is_lesson_full_fun() RETURNS trigger AS $$
