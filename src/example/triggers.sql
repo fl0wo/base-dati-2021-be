@@ -117,12 +117,13 @@ BEGIN
         RETURN NULL;
     END IF;
 END;
+$$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS check_transaction ON "gym".transactions
+DROP TRIGGER IF EXISTS check_transaction ON "gym".transactions;
 CREATE TRIGGER check_transaction
 BEFORE INSERT OR UPDATE ON "gym".transactions
 FOR EACH ROW
-EXECUTE FUNCTION "gym".check_transaction
+EXECUTE FUNCTION "gym".check_transaction();
 
 
 -- Controlla che l'iscrizione non sia fatta da Admin o Istrtuttori //IVAN
@@ -135,19 +136,18 @@ DECLARE
 BEGIN
     SELECT * INTO client
     FROM "gym".users u
-    WHERE u.id = NEW.user
+    WHERE u.id = NEW.user;
 
-    IF client.role <> "User" THEN
-        RETURN NULL
+    IF client.role <> 'customer' THEN
+        RETURN NULL;
     ELSE
-        RETURN NEW
+        RETURN NEW;
     END IF;
 END
-
-DROP TRIGGER IF EXISTS check_transaction ON "gym".subscription
-CREATE TRIGGER check_subscription
-BEFORE INSERT OR UPDATE ON "gym".subscription
-FOR EACH ROW
-EXECUTE FUNCTION "gym".subscription
-
 $$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS check_transaction ON "gym".subscriptions;
+CREATE TRIGGER check_subscription
+BEFORE INSERT OR UPDATE ON "gym".subscriptions
+FOR EACH ROW
+EXECUTE FUNCTION "gym".check_subscription();
