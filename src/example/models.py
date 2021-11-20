@@ -77,7 +77,7 @@ class Transactions(db.Model):
     date = db.Column("date", db.Date)
     time = db.Column("time", db.Time)
     description = db.Column("description", db.String(50))
-    subscription = db.Column("subscription", ID_TYPE, db.ForeignKey(Users.id), nullable=False)
+    subscription = db.Column("subscription", ID_TYPE, db.ForeignKey(Subscriptions.id), nullable=False)
     product = db.Column("product", ID_TYPE, db.ForeignKey(Products.id), nullable=False)
 
 
