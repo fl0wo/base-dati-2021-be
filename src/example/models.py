@@ -1,9 +1,12 @@
 import flask_sqlalchemy
 import sqlalchemy
 from sqlalchemy import (Column, Integer, String, Numeric, CheckConstraint, UniqueConstraint)
-from .lowdb import create_schema
+from .lowdb import create_schema, create_trigger
 
 create_schema("gym")
+
+create_trigger()
+
 
 db = flask_sqlalchemy.SQLAlchemy()
 
