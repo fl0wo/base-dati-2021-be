@@ -1,12 +1,7 @@
-
 import sqlalchemy
 from . import config
 
-from sqlalchemy import (
-    create_engine, Column, Integer, String, Numeric,
-    CheckConstraint, UniqueConstraint, ForeignKeyConstraint,
-    Table, Column, Integer, String, DDL
-)
+from sqlalchemy import (create_engine, DDL)
 
 engine = sqlalchemy.create_engine(config.DATABASE_CONNECTION_URI)
 

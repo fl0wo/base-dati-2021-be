@@ -1,13 +1,7 @@
 import flask_sqlalchemy
 import sqlalchemy
-
+from sqlalchemy import (Column, Integer, String, Numeric, CheckConstraint, UniqueConstraint)
 from .lowdb import create_schema
-
-from sqlalchemy import (
-    create_engine, Column, Integer, String, Numeric,
-    CheckConstraint, UniqueConstraint, ForeignKeyConstraint,
-    Table, Column, Integer, String, DDL
-)
 
 create_schema("gym")
 
