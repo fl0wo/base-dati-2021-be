@@ -1,5 +1,5 @@
 
---Controllo che la righa in Courses punti sempre a un trainer e mai a un user o admin
+--Controllo che la riga in Courses punti sempre a un trainer e mai a un user o admin
 CREATE OR REPLACE FUNCTION "gym".is_trainer_fun() RETURNS trigger AS $$
 
 DECLARE
@@ -7,15 +7,15 @@ DECLARE
 
     BEGIN
         SELECT * INTO trainer_row
-        FROM "gym".users user
-        WHERE user.id=NEW.trainer;
+        FROM "gym".users u
+        WHERE u.id=NEW.trainer;
 
-        IF trainer_row.role=="trainer" THEN
+        IF trainer_row.role=='trainer' THEN
             RETURN NEW;
         ELSE
             RETURN NULL;
         END IF;
-    END;
+    END
 $$ LANGUAGE plpgsql;
 
 
@@ -23,7 +23,7 @@ DROP TRIGGER IF EXISTS is_trainer ON "gym".courses;
 CREATE TRIGGER is_trainer
 BEFORE INSERT OR UPDATE ON "gym".courses
 FOR EACH ROW
-EXECUTE FUNCTION "gym".is_trainer_fun()
+EXECUTE FUNCTION "gym".is_trainer_fun();
 
 
 
