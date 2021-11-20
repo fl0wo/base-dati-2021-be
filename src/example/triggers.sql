@@ -73,12 +73,12 @@ DECLARE
         WHERE lesson.id=NEW.lesson;
 
         SELECT COUNT(*) INTO current_occupation
-        FROM "gym".lesson_reservations lr
+        FROM "gym".lesson_reservation lr
         WHERE lr.lesson = NEW.lesson;
 
-        IF current_occupation+1>lesson_row.max_partecipants THEN
-            DELETE FROM "gym".reservations r
-            WHERE r.id = NEW.reservation_id;
+        IF current_occupation+1>lesson_row.max_participants THEN
+        -- TODO: use roolback    DELETE FROM "gym".reservations r
+        --    WHERE r.id = NEW.reservation_id;
             RETURN NULL;
         ELSE
             RETURN NEW;
@@ -86,11 +86,11 @@ DECLARE
     END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS is_lesson_full ON "gym".lesson_reservations;
+DROP TRIGGER IF EXISTS is_lesson_full ON "gym".lesson_reservation;
 CREATE TRIGGER is_lesson_full
-BEFORE INSERT OR UPDATE ON "gym".lesson_reservations
+BEFORE INSERT OR UPDATE ON "gym".lesson_reservation
 FOR EACH ROW
-EXECUTE FUNCTION "gym".is_lesson_full_fun()
+EXECUTE FUNCTION "gym".is_lesson_full_fun();
 
 
 
