@@ -103,7 +103,7 @@ class Accesses(db.Model):
         {"schema": "gym"}
     )
 
-    id = db.Column("id", db.Integer, primary_key=True)
+    id = db.Column("id", ID_TYPE, primary_key=True)
     date = db.Column("date", db.Date)
     time_entrance = db.Column("time_entrance", db.Time)
     time_exit = db.Column("time_exit", db.Time)
