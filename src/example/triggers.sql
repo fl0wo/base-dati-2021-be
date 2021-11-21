@@ -148,7 +148,7 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS check_transaction ON "gym".subscriptions;
+DROP TRIGGER IF EXISTS check_subscription ON "gym".subscriptions;
 CREATE TRIGGER check_subscription
 BEFORE INSERT OR UPDATE ON "gym".subscriptions
 FOR EACH ROW
