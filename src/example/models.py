@@ -5,7 +5,7 @@ from .lowdb import define_schema, define_trigger, define_roles
 
 define_schema("gym")
 define_trigger()
-define_roles()
+#define_roles()
 
 db = flask_sqlalchemy.SQLAlchemy()
 

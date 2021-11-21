@@ -5,30 +5,40 @@ import jwt
 import datetime
 from functools import wraps
 
-from .app import *
+from . import config
 from .database import get_by_id
 from .models import Users
 
 
-# si prende f e la decora concatenando new checktoken fun
-def token_required(f):
-    @wraps(f)
-    def dec(*args, **kwargs):
+def get_current_user(request):
+    token = get_token(request.headers)
+    data = jwt.decode(token, config.secret)
+    return get_by_id(Users, data['id'])
 
-        token = None
 
-        if 'x-access-tokens' in request.headers:
-            token = request.headers['x-access-tokens']
+def get_token(headers):
+    return headers['x-access-token']
 
-        if not token:
-            return jsonify({'message': 'token is missing'})
 
+def require_token(func):
+    @wraps(func)
+    def func_with_handler(*args, **kwargs):
         try:
-            data = jwt.decode(token, app.config[SECRET_KEY])
-            current_user = get_user_by_id(Users, data['id'])
-        except:
-            return jsonify({'message': 'token is invalid'})
+            return func(*args, **kwargs)
+        except (BadTokenError, MissingTokenError) as error:
+            return jsonify({'message': error.args[0]}), 401
+    return func_with_handler
 
-        return f(current_user, *args, **kwargs)
 
-    return dec
+def admin_required(func):
+    @wraps(func)
+    def f(*args, **kwargs):
+        try:
+            user = args
+            if user.role != "admin":
+                return jsonify({'message': "not authorized"}), 401
+        except (BadTokenError, MissingTokenError) as error:
+            return jsonify({'message': error.args[0]}), 401
+    return f
+
+

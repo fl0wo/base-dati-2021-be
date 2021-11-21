@@ -4,7 +4,7 @@ from flask import current_app, flash, jsonify, make_response, redirect, request,
 
 from . import create_app, database
 from .models import Cats, Users
-from .security import token_required
+from .security import admin_required, require_token, get_current_user
 
 from werkzeug.security import generate_password_hash, \
     check_password_hash  # not constant due to salt adding (guarda rainbow table attack)
@@ -16,20 +16,29 @@ from functools import wraps
 app = create_app()
 
 
-@app.route('/', methods=['GET'])
-def fetch():
-    cats = database.get_all(Cats)
-    all_cats = []
-    for cat in cats:
-        new_cat = {
-            "id": cat.id,
-            "name": cat.name,
-            "price": cat.price,
-            "breed": cat.breed
-        }
+@require_token
+@admin_required
+@app.route('/me', methods=['GET'])
+def me():
+    user = get_current_user(request)
+    return jsonify({
+            "name": user.email,
+            "surname": user.surname,
+            "role": user.role
+        }), 200
 
-        all_cats.append(new_cat)
-    return json.dumps(all_cats), 200
+
+@app.route('/users', methods=['GET'])
+def fetch(current_user):
+    dbusers = database.get_all(Users)
+    users = []
+    for user in dbusers:
+        users.append({
+            "name": user.name,
+            "surname": user.surname,
+            "role": user.role
+        })
+    return json.dumps(users), 200
 
 
 @app.route('/add', methods=['POST'])
@@ -82,6 +91,6 @@ def login_user():
             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
             app.config['SECRET_KEY']
         )
-        return jsonify({'token': token.encode().decode('UTF-8')})
+        return jsonify({'token': token.decode('UTF-8')})
 
     return make_response('could not verify', 401, {'WWW.Authentication': 'Basic realm: "login required"'})
