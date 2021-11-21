@@ -29,9 +29,9 @@ GRANT DELETE, INSERT, UPDATE, SELECT ON TABLE "gym".lesson_reservation TO traine
 GRANT DELETE, INSERT, UPDATE, SELECT ON TABLE "gym".lesson_reservation TO manager;
 
 --Weight Room Reservations
-GRANT DELETE, INSERT, UPDATE, SELECT ON TABLE "gym".weight_room_reservation TO customer;
-GRANT DELETE, INSERT, UPDATE, SELECT ON TABLE "gym".weight_room_reservation TO trainer;
-GRANT DELETE, INSERT, UPDATE, SELECT ON TABLE "gym".weight_room_reservation TO manager;
+GRANT DELETE, INSERT, UPDATE, SELECT ON TABLE "gym".weight_room_reservations TO customer;
+GRANT DELETE, INSERT, UPDATE, SELECT ON TABLE "gym".weight_room_reservations TO trainer;
+GRANT DELETE, INSERT, UPDATE, SELECT ON TABLE "gym".weight_room_reservations TO manager;
 
 --Slots
 GRANT SELECT ON TABLE "gym".slots TO customer;
