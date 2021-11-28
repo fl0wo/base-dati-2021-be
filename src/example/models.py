@@ -164,7 +164,7 @@ class WeightRoomReservations(db.Model):
     __table_name__ = "WeightRoomReservations"
     __table_args__ = (UniqueConstraint("slot", "reservation_id"), {"schema": "gym"})
 
-    reservation_number =  db.Column("reservation_number", db.Integer, primary_key=True)
+    reservation_number = db.Column("reservation_number", db.Integer, primary_key=True)
     reservation_id = db.Column("reservation_id", ID_TYPE, db.ForeignKey(Reservations.id),
                                primary_key=True, nullable=False)
     slot = db.Column("slot", ID_TYPE, db.ForeignKey(Slots.id), nullable=False)

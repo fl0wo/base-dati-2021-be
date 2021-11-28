@@ -1,6 +1,8 @@
 import json
 
 from flask import current_app, flash, jsonify, make_response, redirect, request, url_for
+from flask_cors import CORS
+
 
 from . import create_app, database
 from .models import Cats, Users
@@ -14,6 +16,7 @@ import datetime
 from functools import wraps
 
 app = create_app()
+CORS(app)
 
 
 @require_token
