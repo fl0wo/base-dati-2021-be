@@ -29,14 +29,15 @@ def me():
 
 
 @app.route('/users', methods=['GET'])
-def fetch(current_user):
+def fetch():
     dbusers = database.get_all(Users)
     users = []
     for user in dbusers:
         users.append({
             "name": user.name,
             "surname": user.surname,
-            "role": user.role
+            "role": user.role,
+            "email" : user.email
         })
     return json.dumps(users), 200
 
