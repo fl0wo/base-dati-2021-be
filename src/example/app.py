@@ -17,15 +17,15 @@ app = create_app()
 
 
 @require_token
-@admin_required
 @app.route('/me', methods=['GET'])
 def me():
     user = get_current_user(request)
     return jsonify({
-            "name": user.email,
-            "surname": user.surname,
-            "role": user.role
-        }), 200
+        "name": user.name,
+        "surname": user.surname,
+        "role": user.role,
+        "email": user.email
+    }), 200
 
 
 @app.route('/users', methods=['GET'])
@@ -72,20 +72,32 @@ def signup_user():
 
     hashed_password = generate_password_hash(data['password'], method='sha256')
 
-    database.add_instance(Users, id=str(uuid.uuid4()), email=data['email'], password=hashed_password)
+    try:
+        database.add_instance(Users,
+                              id=str(uuid.uuid4()),
+                              email=data['email'],
+                              password=hashed_password,
+                              name=data['name'],
+                              surname=data['surname'])
+    except:
+        return jsonify({'message': 'already registered'})
+
     return jsonify({'message': 'registered successfully'})
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login_user():
-    auth = request.authorization
+    auth = request.headers
 
-    if not auth or not auth.username or not auth.password:
+    email = auth['username']
+    try_password = auth['password']
+
+    if not auth or not email or not try_password:
         return make_response('could not verify', 401, {'Authentication': 'Basic realm: "login required"'})
 
-    user = database.get_by_email(Users, auth.username)
+    user = database.get_by_email(Users, email)
 
-    if check_password_hash(user.password, auth.password):
+    if check_password_hash(user.password, try_password):
         token = jwt.encode({
             'id': user.id,
             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
