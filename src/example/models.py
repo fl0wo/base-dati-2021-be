@@ -1,9 +1,10 @@
 import flask_sqlalchemy
 import sqlalchemy
 from sqlalchemy import (Column, Integer, String, Numeric, CheckConstraint, UniqueConstraint, Date)
-from .lowdb import define_schema, define_trigger, define_roles
+from .lowdb import define_schema#, define_trigger, define_roles
 
 define_schema("gym")
+
 #define_trigger()
 #define_roles()
 

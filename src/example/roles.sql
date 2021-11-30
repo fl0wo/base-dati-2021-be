@@ -1,4 +1,4 @@
-CREATE USER customer WITH password 'customer';
+CREATE USER  customer WITH password 'customer';
 CREATE USER trainer WITH password 'trainer';
 CREATE USER machine WITH password 'machine';
 CREATE USER manager WITH password 'manager';

@@ -1,4 +1,3 @@
-
 --Controllo che la riga in Courses punti sempre a un trainer e mai a un user o admin
 CREATE OR REPLACE FUNCTION "gym".is_trainer_fun() RETURNS trigger AS $$
 
