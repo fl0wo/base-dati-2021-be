@@ -1,4 +1,4 @@
-# base-dati-2021-be
+# GymApp BE
 Progetto Base Dati BackEnd
 
 # pre-alpha 0.1 
