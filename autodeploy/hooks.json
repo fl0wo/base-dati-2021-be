@@ -1,0 +1,7 @@
+[
+  {
+    "id": "redeploy",
+    "execute-command": "/home/ubuntu/gym/redeploy.sh",
+    "response-message": "Redeploying API server."
+  }
+]
