@@ -30,15 +30,24 @@ def require_token(func):
     return func_with_handler
 
 
-def admin_required(func):
+def role_required(func, min_desired_role):
     @wraps(func)
     def f(*args, **kwargs):
         try:
             user = args
-            if user.role != "admin":
+            if user.role != min_desired_role:
                 return jsonify({'message': "not authorized"}), 401
         except (BadTokenError, MissingTokenError) as error:
             return jsonify({'message': error.args[0]}), 401
     return f
+
+
+def admin_required(func):
+    return role_required(func, "admin")
+
+
+def manager_required(func):
+    return role_required(func, "manager")
+
 
 

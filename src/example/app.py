@@ -80,6 +80,7 @@ def fetchSlotsReservations():
     return sendResponse(slots, "", 200)
 
 
+@require_token
 @app.route('/slots/add', methods=['POST'])
 def addSlot():
     body = request.get_json()
@@ -133,8 +134,7 @@ def login_user():
             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
             app.config['SECRET_KEY']
         )
-        r.data = jsonify({'token': token.decode('UTF-8')})
-        return jsonify(r)
+        return sendResponse({'token': token.decode('UTF-8')},"New token",200)
 
     return sendResponse({'WWW.Authentication': 'Basic realm: "login required"'}, 'could not verify', 401)
 
