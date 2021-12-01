@@ -22,3 +22,7 @@ def define_roles():
 def perform_query(file):
     query = text(file.read())
     engine.execute(query)
+
+
+def perform_query_txt(query):
+    return engine.execute(query)

@@ -1,5 +1,6 @@
 from .models import db
-
+import sqlalchemy
+from .lowdb import perform_query_txt
 
 def get_all(model):
     data = model.query.all()
@@ -36,3 +37,9 @@ def get_by_email(model, email):
 
 def commit_changes():
     db.session.commit()
+
+def get_all_slots_curent_reservation():
+    sql_query = sqlalchemy.text("SELECT s.*, count(w.*) as current_reservations FROM gym.slots s left join gym.weight_room_reservations w on s.id = w.slot group by id, date, time_from, time_to, max_capacity;")
+    result = perform_query_txt(sql_query)
+    result_as_list = result.fetchall()
+    return result_as_list;

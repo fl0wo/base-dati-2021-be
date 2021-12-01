@@ -16,6 +16,10 @@ import jwt
 import datetime
 from functools import wraps
 
+DATE_FORMAT = '%Y/%m/%d'
+
+TIME_FORMAT = "%H:%M:%S"
+
 app = create_app()
 CORS(app)
 
@@ -62,6 +66,22 @@ def fetch():
             "email" : user.email
         })
     return sendResponse(json.dumps(users), "", 200)
+
+
+@app.route('/slotsReservations', methods=['GET'])
+def fetchSlotsReservations():
+    dbSlots = database.get_all_slots_curent_reservation()
+    slots = []
+    for s in dbSlots:
+        slots.append({
+            "id": s['id'],
+            "date": (s['date']).strftime(DATE_FORMAT),
+            "time_from": s['time_from'].strftime(TIME_FORMAT),
+            "time_to": s['time_to'].strftime(TIME_FORMAT),
+            "max_capacity": s['max_capacity'],
+            "current_reservations": s['current_reservations']
+        })
+    return sendResponse(slots, "", 200)
 
 
 @app.route('/add', methods=['POST'])
