@@ -4,7 +4,7 @@ from flask import current_app, flash, jsonify, make_response, redirect, request,
 from flask_cors import CORS
 from . import create_app, database
 from .models import Cats, Users, Slots
-from .security import admin_required, require_token, get_current_user
+from .security import admin_required, get_current_user, get_current_admin, get_current_manager
 from .response import Response
 from werkzeug.security import generate_password_hash, \
     check_password_hash  # not constant due to salt adding (guarda rainbow table attack)
@@ -36,10 +36,11 @@ def sendResponse(payload, msg, status):
     return jsonify(r.toJSON()), status, basicHeaders
 
 
-@require_token
 @app.route('/me', methods=['GET'])
 def me():
     user = get_current_user(request)
+    if user is None:
+        return jsonify({'message': 'user not logged'}), 401
 
     data = {
         "name": user.name,
@@ -50,10 +51,13 @@ def me():
     return sendResponse(data, "", 200)
 
 
-@require_token
 @app.route('/users', methods=['GET'])
 def fetch():
-    user = get_current_admin(request)
+    admin = get_current_admin(request)
+    if admin is None:
+        return jsonify({'message': 'user not logged'}), 401
+    if admin is False:
+        return jsonify({'message': 'role not sufficient'}), 401
 
     dbusers = database.get_all(Users)
     users = []
@@ -83,10 +87,13 @@ def fetchSlotsReservations():
     return sendResponse(slots, "", 200)
 
 
-#@require_token
 @app.route('/slots/add', methods=['POST'])
 def addSlot():
-    #user = get_current_manager(request)
+    manager = get_current_manager(request)
+    if manager is None:
+        return jsonify({'message': 'user not logged'}), 401
+    if manager is False:
+        return jsonify({'message': 'role not sufficient'}), 401
 
     body = request.get_json()
     #TODO: check that timefrom < timeto

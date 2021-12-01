@@ -28,14 +28,19 @@ def rolelvl(role):
 
 
 def get_current_user(request):
-    token = get_token(request.headers)
-    data = jwt.decode(token, config.secret)
-    return get_by_id(Users, data['id'])
+    try:
+        token = get_token(request.headers)
+        data = jwt.decode(token, config.secret)
+        return get_by_id(Users, data['id'])
+    except:
+        return None
 
 
 def check_user_role(user, desired_role):
+    if user is None:
+        return None
     if rolelvl(user.role) < rolelvl(desired_role):
-        return jsonify({'message': "insufficient role"}), 401
+        return False
     return user
 
 
@@ -53,15 +58,22 @@ def get_token(headers):
     return headers['x-access-token']
 
 
-def require_token(func):
-    @wraps(func)
-    def func_with_handler(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except (BadTokenError, MissingTokenError) as error:
-            return jsonify({'message': error.args[0]}), 401
+def get_decorator():
 
-    return func_with_handler
+    def decorator(func):
+
+        def new_func(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except:
+                return jsonify({'message': error.args[0]}), 401
+
+        return new_func
+
+    return decorator
+
+
+require_token = get_decorator()
 
 
 def role_required(func, min_desired_role):
