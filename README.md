@@ -1,7 +1,7 @@
 # GymApp BE
 Progetto Base Dati BackEnd
 
-# pre-alpha 0.1 
+# beta 0.1 
 
 TODO : 
 
