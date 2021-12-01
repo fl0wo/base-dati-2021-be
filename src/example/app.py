@@ -50,8 +50,11 @@ def me():
     return sendResponse(data, "", 200)
 
 
+@require_token
 @app.route('/users', methods=['GET'])
 def fetch():
+    user = get_current_admin(request)
+
     dbusers = database.get_all(Users)
     users = []
     for user in dbusers:
@@ -80,19 +83,21 @@ def fetchSlotsReservations():
     return sendResponse(slots, "", 200)
 
 
-@require_token
+#@require_token
 @app.route('/slots/add', methods=['POST'])
 def addSlot():
-    body = request.get_json()
+    #user = get_current_manager(request)
 
+    body = request.get_json()
+    #TODO: check that timefrom < timeto
     database.add_instance(Slots,
                           id=str(uuid.uuid4()),
-                          date=body.date,
-                          time_from=body.time_from,
-                          time_to=body.time_to,
-                          max_capacity=body.max_capacity,  # TODO: check if > 1
-                          title=body.title,
-                          description=body.description,
+                          date=body['date'],
+                          time_from=body['time_from'],
+                          time_to=body['time_to'],
+                          max_capacity=body['max_capacity'],  # TODO: check if > 1
+                          title=body['title'],
+                          description=body['description'],
                           )
 
     return sendResponse({}, "Added", 200)
