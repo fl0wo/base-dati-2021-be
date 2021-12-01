@@ -159,6 +159,8 @@ class Slots(db.Model):
     time_from = db.Column("time_from", db.Time)
     time_to = db.Column("time_to", db.Time)
     max_capacity = db.Column("max_capacity", db.Integer, CheckConstraint("max_capacity > 0"), default=20)
+    title = db.Column("title", db.String(40))
+    description = db.Column("description", db.String(150))
 
 
 class WeightRoomReservations(db.Model):

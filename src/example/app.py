@@ -2,13 +2,10 @@ import json
 
 from flask import current_app, flash, jsonify, make_response, redirect, request, url_for
 from flask_cors import CORS
-
-
 from . import create_app, database
 from .models import Cats, Users
 from .security import admin_required, require_token, get_current_user
 from .response import Response
-
 from werkzeug.security import generate_password_hash, \
     check_password_hash  # not constant due to salt adding (guarda rainbow table attack)
 import uuid
