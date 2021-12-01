@@ -3,7 +3,7 @@ import json
 from flask import current_app, flash, jsonify, make_response, redirect, request, url_for
 from flask_cors import CORS
 from . import create_app, database
-from .models import Cats, Users
+from .models import Cats, Users, Slots
 from .security import admin_required, require_token, get_current_user
 from .response import Response
 from werkzeug.security import generate_password_hash, \
@@ -20,13 +20,12 @@ TIME_FORMAT = "%H:%M:%S"
 app = create_app()
 CORS(app)
 
-
 basicHeaders = [
-        ('Content-Type', 'application/json'),
-        ('Access-Control-Allow-Origin', '*'),
-        ('Access-Control-Allow-Headers', 'Authorization, Content-Type'),
-        ('Access-Control-Allow-Methods', 'POST'),
-      ]
+    ('Content-Type', 'application/json'),
+    ('Access-Control-Allow-Origin', '*'),
+    ('Access-Control-Allow-Headers', 'Authorization, Content-Type'),
+    ('Access-Control-Allow-Methods', 'POST'),
+]
 
 
 def sendResponse(payload, msg, status):
@@ -60,7 +59,7 @@ def fetch():
             "name": user.name,
             "surname": user.surname,
             "role": user.role,
-            "email" : user.email
+            "email": user.email
         })
     return sendResponse(json.dumps(users), "", 200)
 
@@ -81,14 +80,19 @@ def fetchSlotsReservations():
     return sendResponse(slots, "", 200)
 
 
-@app.route('/add', methods=['POST'])
-def add():
-    data = request.get_json()
-    name = data['name']
-    price = data['price']
-    breed = data['breed']
+@app.route('/slots/add', methods=['POST'])
+def addSlot():
+    body = request.get_json()
 
-    database.add_instance(Cats, name=name, price=price, breed=breed)
+    database.add_instance(Slots,
+                          id=str(uuid.uuid4()),
+                          date=body.date,
+                          time_from=body.time_from,
+                          time_to=body.time_to,
+                          max_capacity=body.max_capacity,  # TODO: check if > 1
+                          title=body.title,
+                          description=body.description,
+                          )
 
     return sendResponse({}, "Added", 200)
 
@@ -119,7 +123,7 @@ def login_user():
     email = auth['username']
     try_password = auth['password']
     if not auth or not email or not try_password:
-        return sendResponse({'Authentication': 'Basic realm: "login required"'}, 'could not verify' , 401)
+        return sendResponse({'Authentication': 'Basic realm: "login required"'}, 'could not verify', 401)
 
     user = database.get_by_email(Users, email)
 
@@ -133,7 +137,6 @@ def login_user():
         return jsonify(r)
 
     return sendResponse({'WWW.Authentication': 'Basic realm: "login required"'}, 'could not verify', 401)
-
 
 # @app.route('/remove/<cat_id>', methods=['DELETE'])
 # def remove(cat_id):
