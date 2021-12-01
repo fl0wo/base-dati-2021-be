@@ -82,7 +82,9 @@ def fetchSlotsReservations():
             "time_from": s['time_from'].strftime(TIME_FORMAT),
             "time_to": s['time_to'].strftime(TIME_FORMAT),
             "max_capacity": s['max_capacity'],
-            "current_reservations": s['current_reservations']
+            "current_reservations": s['current_reservations'],
+            "title" : s['title'],
+            "description" : s['description']
         })
     return sendResponse(slots, "", 200)
 
