@@ -18,11 +18,11 @@ CUSTOMER = "customer"
 def rolelvl(role):
     if role == ADMIN:
         return 4
-    if role == 'manager':
+    if role == MANAGER:
         return 3
-    if role == 'trainer':
+    if role == TRAINER:
         return 2
-    if role == 'customer':
+    if role == CUSTOMER:
         return 1
     return 0
 
