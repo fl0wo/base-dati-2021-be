@@ -1,0 +1,10 @@
+#!/bin/sh
+
+docker ps -a | awk '{ print $1,$2 }' | grep floflo49/gymbsd | awk '{print $1 }' | xargs -I {} docker rm -f {} && \
+echo "removed old container" && \
+docker pull floflo49/gymbsd && \
+echo "latest image pulled" && \
+docker image prune -f && \
+echo "removed untagged image" && \
+docker run -dit -p 5000:5000 floflo49/gymbsd:latest && \
+echo "running new version"
