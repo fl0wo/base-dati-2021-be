@@ -1,7 +1,7 @@
 import json
 
 from flask import current_app, flash, jsonify, make_response, redirect, request, url_for
-#from flask_cors import CORS
+from flask_cors import CORS
 
 
 from . import create_app, database
@@ -17,8 +17,7 @@ import datetime
 from functools import wraps
 
 app = create_app()
-#CORS(app)
-
+CORS(app)
 
 
 basicHeaders = [
@@ -27,7 +26,6 @@ basicHeaders = [
         ('Access-Control-Allow-Headers', 'Authorization, Content-Type'),
         ('Access-Control-Allow-Methods', 'POST'),
       ]
-
 
 
 def sendResponse(payload, msg, status):
@@ -106,8 +104,6 @@ def login_user():
     if not auth or not email or not try_password:
         return sendResponse({'Authentication': 'Basic realm: "login required"'}, 'could not verify' , 401)
 
-    # return make_response('could not verify', 401, {'Authentication': 'Basic realm: "login required"'})
-
     user = database.get_by_email(Users, email)
 
     if check_password_hash(user.password, try_password):
@@ -120,7 +116,6 @@ def login_user():
         return jsonify(r)
 
     return sendResponse({'WWW.Authentication': 'Basic realm: "login required"'}, 'could not verify', 401)
-#    return make_response('could not verify', 401, {'WWW.Authentication': 'Basic realm: "login required"'})
 
 
 # @app.route('/remove/<cat_id>', methods=['DELETE'])

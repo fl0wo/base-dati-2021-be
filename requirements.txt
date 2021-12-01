@@ -5,3 +5,4 @@ datetime
 uuid
 PyJWT==1.7.1
 Werkzeug
+flask-cors
