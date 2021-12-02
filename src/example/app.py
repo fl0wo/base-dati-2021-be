@@ -3,7 +3,7 @@ import json
 from flask import current_app, flash, jsonify, make_response, redirect, request, url_for
 from flask_cors import CORS
 from . import create_app, database
-from .models import Cats, Users, Slots
+from .models import Cats, Users, Slots, Reservations, WeightRoomReservations
 from .security import admin_required, get_current_user, get_current_admin, get_current_manager
 from .response import Response
 from werkzeug.security import generate_password_hash, \
@@ -111,6 +111,36 @@ def addSlot():
 
     return sendResponse({}, "Added", 200)
 
+
+@app.route('/slots/reservation', methods=['POST'])
+def addSlotReservation():
+    user = get_current_user(request)
+    if user is None:
+        return jsonify({'message': 'user not logged'}), 401
+    if user is False:
+        return jsonify({'message': 'role not sufficient'}), 401
+
+    body = request.get_json()
+
+    #database.begin_transaction() ---> sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Session.
+    #TODO Cercare di capire come evitare sql injections, o facciamo dei controlli sul parametro oppure bisogna cambiare modo di fare le query
+    db_is_space = database.check_if_space_for_slot_reservation(body['idSlot'])
+    is_space = db_is_space[0]['there_is_space']#TODO IVAN Controlla se sta roba funziona
+    if is_space == 0:
+        return sendResponse({}, "Not enough space in slot", 401)
+
+    reservation_id = str(uuid.uuid4())
+    database.add_instance_no_commit(Reservations,
+                          id=reservation_id,
+                          customer = body['idUser'],
+                          room = '1')
+    database.add_instance_no_commit(WeightRoomReservations,
+                          reservation_number = 999, #FIXME TODO: MANDARGLI DA FRONT END/ fare query qui x prendersi il progressivo della reservation x quel determinato slot oppure eliminare il campo perche non viene mai usato
+                          reservation_id= reservation_id,
+                          slot = (body['idSlot']) )
+    database.commit_changes()
+
+    return sendResponse({}, "Subscribed to slot", 200)
 
 @app.route('/register', methods=['GET', 'POST'])
 def signup_user():

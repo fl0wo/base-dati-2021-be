@@ -1,6 +1,7 @@
 import flask_sqlalchemy
 import sqlalchemy
 from sqlalchemy import (Column, Integer, String, Numeric, CheckConstraint, UniqueConstraint, Date)
+from sqlalchemy.sql import func
 from .lowdb import define_schema#, define_trigger, define_roles
 
 define_schema("gym")
@@ -126,8 +127,8 @@ class Reservations(db.Model):
     )
 
     id = db.Column("id", ID_TYPE, primary_key=True)
-    date = db.Column("date", db.Date)
-    time = db.Column("time", db.Time)
+    date = db.Column("date", db.Date, default=func.now())#TODO capire se bisogna eliminare lo schema a db e riinizializzarlo con flask perche non funziona now()
+    time = db.Column("time", db.Time, default=func.now())
     customer = db.Column("customer", ID_TYPE, db.ForeignKey(Users.id), nullable=False)
     room = db.Column("room", ID_TYPE, db.ForeignKey(Rooms.id), nullable=False)
 
