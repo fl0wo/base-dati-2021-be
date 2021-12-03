@@ -51,6 +51,17 @@ def me():
     return sendResponse(data, "", 200)
 
 
+@app.route('/me/subscriptions', methods=['GET'])
+def my_subscriptions():
+    user = get_current_user(request)
+    if user is None:
+        return jsonify({'message': 'user not logged'}), 401
+
+    subscription_data = database.get_subscriptions_of(user.id)
+
+    return sendResponse(subscription_data, "", 200)
+
+
 @app.route('/users', methods=['GET'])
 def fetch():
     admin = get_current_admin(request)
