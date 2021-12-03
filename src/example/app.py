@@ -85,7 +85,9 @@ def fetch():
             "name": user.name,
             "surname": user.surname,
             "role": user.role,
-            "email": user.email
+            "email": user.email,
+            "birth_date": user.birth_date.strftime(DATE_FORMAT),
+            "fiscal_code": user.fiscal_code
         })
     return sendResponse(json.dumps(users), "", 200)
 
