@@ -57,8 +57,16 @@ def my_subscriptions():
     if user is None:
         return jsonify({'message': 'user not logged'}), 401
 
-    subscription_data = database.get_subscriptions_of(user.id)
-
+    db_subscription = database.get_subscriptions_of(user.id)
+    subscription_data = []
+    for sub in db_subscription:
+        subscription_data.append({
+            "reservation_type": sub.reservation_type,
+            "date": sub.date,
+            "time": sub.time,
+            "participant_number": sub.participant_number,
+            "slot": sub.slot
+        })
     return sendResponse(subscription_data, "", 200)
 
 
