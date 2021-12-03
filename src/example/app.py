@@ -89,6 +89,23 @@ def fetchSlotsReservations():
     return sendResponse(slots, "", 200)
 
 
+@app.route('/lessonsReservations', methods=['GET'])
+def fetchLessonsReservations():
+    dbLessons = database.get_all_lessons_curent_reservation()
+    lessons = []
+    for l in dbLessons:
+        lessons.append({
+            "id": l['id'],
+            "date": (l['date']).strftime(DATE_FORMAT),
+            "time": l['time'].strftime(TIME_FORMAT),
+            "max_participants": l['max_participants'],
+            "current_reservations": l['current_reservations'],
+            "course" : l['course'],
+            "course_description": l['course_description']
+        })
+    return sendResponse(lessons, "", 200)
+
+
 @app.route('/slots/add', methods=['POST'])
 def addSlot():
     manager = get_current_manager(request)

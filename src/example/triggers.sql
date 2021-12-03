@@ -11,7 +11,7 @@ DECLARE
         -- TODO: use this method
         -- return safeReturn(trainer_row.role=='trainer',NEW);
 
-        IF trainer_row.role=='trainer' THEN
+        IF trainer_row.role == 'trainer' THEN
             RETURN NEW;
         ELSE
             RETURN NULL;

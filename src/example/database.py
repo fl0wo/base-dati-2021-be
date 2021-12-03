@@ -54,3 +54,9 @@ def check_if_space_for_slot_reservation(slotId):
     result = perform_query_txt(sql_query)
     result_as_list = result.fetchall()
     return result_as_list;
+
+def get_all_lessons_curent_reservation():
+    sql_query = sqlalchemy.text("SELECT l.id, l.date, l.time, l.max_participants, count(lr.*) as current_reservations, c.name as course, c.description as course_description FROM gym.lessons l left join gym.lesson_reservation lr on l.id = lr.lesson inner join gym.courses c on c.id = l.course group by l.id, date, time, max_participants, c.name, c.description;")
+    result = perform_query_txt(sql_query)
+    result_as_list = result.fetchall()
+    return result_as_list;
