@@ -62,8 +62,8 @@ def my_subscriptions():
     for sub in db_subscription:
         subscription_data.append({
             "reservation_type": sub.reservation_type,
-            "date": sub.date,
-            "time": sub.time,
+            "date": sub.date.strftime(DATE_FORMAT),
+            "time": sub.time.strftime(TIME_FORMAT),
             "participant_number": sub.participant_number,
             "slot": sub.slot
         })
