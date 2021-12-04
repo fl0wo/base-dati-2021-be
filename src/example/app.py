@@ -14,7 +14,7 @@ import datetime
 from functools import wraps
 
 DATE_FORMAT = '%Y/%m/%d'
-
+DATE_FORMAT_IN = '%Y-%m-%d'
 TIME_FORMAT = "%H:%M:%S"
 
 app = create_app()
@@ -58,8 +58,10 @@ def meUpdate():
         return jsonify({'message': 'user not logged'}), 401
     body = request.get_json()
 
+    birth_date = datetime.strptime(body['birth_date'], DATE_FORMAT_IN)
+
     database.edit_instance(Users, id=user.id,
-                           birth_date=body['birth_date'].strftime(DATE_FORMAT),
+                           birth_date=birth_date.date(),
                            fiscal_code=body['fiscal_code'],
                            phone=body['phone'])
 
