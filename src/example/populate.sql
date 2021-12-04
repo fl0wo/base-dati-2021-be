@@ -13,10 +13,10 @@ INSERT INTO gym.slots values (gen_random_uuid(),'2021-12-21', '08:00:00', '12:00
 INSERT INTO gym.slots values (gen_random_uuid(),'2021-12-21', '12:00:00', '16:00:00', 20, 'Titolo Slot', 'Descrizione slot');
 INSERT INTO gym.slots values (gen_random_uuid(),'2021-12-21', '16:00:00', '20:00:00', 30, 'Titolo Slot', 'Descrizione slot');
 
-INSERT INTO gym.users (id, name, surname, birth_date, fiscal_code, phone, role, email, password) VALUES ('xiloID', 'xilo', 'xilo', null, null, null, 'trainer', 'xilo@gmail.com', :PWD);
-INSERT INTO gym.users (id, name, surname, birth_date, fiscal_code, phone, role, email, password) VALUES ('ivanID', 'ivan', 'ivan', null, null, null, 'customer', 'ivan@gmail.com', :PWD);
-INSERT INTO gym.users (id, name, surname, birth_date, fiscal_code, phone, role, email, password) VALUES ('floID', 'flo', 'flo', null, null, null, 'manager', 'flo@gmail.com', :PWD);
-INSERT INTO gym.users (id, name, surname, birth_date, fiscal_code, phone, role, email, password) VALUES ('adminID', 'admin', 'admin', null, null, null, 'admin', 'admin@gmail.com', :PWD);
+INSERT INTO gym.users (id, name, surname, birth_date, fiscal_code, phone, role, email, password) VALUES ('xiloID', 'xilo', 'xilo', null, null, null, 'trainer', 'trainer', :PWD);
+INSERT INTO gym.users (id, name, surname, birth_date, fiscal_code, phone, role, email, password) VALUES ('ivanID', 'ivan', 'ivan', null, null, null, 'customer', 'customer', :PWD);
+INSERT INTO gym.users (id, name, surname, birth_date, fiscal_code, phone, role, email, password) VALUES ('floID', 'flo', 'flo', null, null, null, 'manager', 'manager', :PWD);
+INSERT INTO gym.users (id, name, surname, birth_date, fiscal_code, phone, role, email, password) VALUES ('adminID', 'admin', 'admin', null, null, null, 'admin', 'admin', :PWD);
 
 INSERT INTO gym.rooms values ('1', 'weight_room');
 INSERT INTO gym.rooms values ('2', 'cyber_robics');

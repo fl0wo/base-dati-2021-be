@@ -155,7 +155,7 @@ def addSlotReservation():
 
     # database.begin_transaction() ---> sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Session.
     # TODO Cercare di capire come evitare sql injections, o facciamo dei controlli sul parametro oppure bisogna cambiare modo di fare le query
-    db_is_space = database.check_if_space_for_slot_reservation(user.id)
+    db_is_space = database.check_if_space_for_slot_reservation(body['idSlot'])
     is_space = db_is_space[0]['there_is_space']  # TODO IVAN Controlla se sta roba funziona
     if is_space == 0:
         return sendResponse({}, "Not enough space in slot", 401)
