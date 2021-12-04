@@ -51,7 +51,7 @@ def me():
     return sendResponse(data, "", 200)
 
 
-@app.route('/me', methods=['PUT'])
+@app.route('/me', methods=['PATCH'])
 def meUpdate():
     user = get_current_user(request)
     if user is None:
@@ -59,9 +59,9 @@ def meUpdate():
     body = request.get_json()
 
     database.edit_instance(Users, id=user.id,
-                           birth_date=body.birth_date.strftime(DATE_FORMAT),
-                           fiscal_code=body.fiscal_code,
-                           phone=body.phone)
+                           birth_date=body['birth_date'].strftime(DATE_FORMAT),
+                           fiscal_code=body['fiscal_code'],
+                           phone=body['phone'])
 
     return sendResponse({}, "Updated", 200)
 
