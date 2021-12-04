@@ -3,13 +3,17 @@ from flask import current_app, flash, jsonify, make_response, redirect, request,
 from flask_cors import CORS
 from . import app, database
 from .models import Cats, Users, Slots, Reservations, WeightRoomReservations
-from .security import admin_required, get_current_user, get_current_admin, get_current_manager
+from .security import admin_required, get_current_user, get_current_admin, get_current_manager, is_logged
 from .response import Response, DATE_FORMAT, DATE_FORMAT_IN, TIME_FORMAT
-from werkzeug.security import generate_password_hash, check_password_hash  # not constant due to salt adding (guarda rainbow table attack)
+from werkzeug.security import generate_password_hash, \
+    check_password_hash  # not constant due to salt adding (guarda rainbow table attack)
 import uuid
 import jwt
 import datetime
 from functools import wraps
+
+from .controllers.user_controller import parse_me,\
+    update_me,parse_my_res
 
 CORS(app)
 
@@ -20,6 +24,7 @@ basicHeaders = [
     ('Access-Control-Allow-Methods', 'POST'),
 ]
 
+
 def sendResponse(payload, msg, status):
     r = Response()
     r.data = payload
@@ -28,60 +33,42 @@ def sendResponse(payload, msg, status):
     return jsonify(r.toJSON()), status, basicHeaders
 
 
-@app.route('/me', methods=['GET'])
-def me():
+def doFinallyCatch(do, success, catch):
+    try:
+        do()
+    except:
+        return catch
+    finally:
+        return success
+
+
+def ifLogged(f):
     user = get_current_user(request)
     if user is None:
         return jsonify({'message': 'user not logged'}), 401
+    return f(user)
 
-    data = {
-        "name": user.name,
-        "surname": user.surname,
-        "role": user.role,
-        "email": user.email,
-        "birth_date": user.birth_date,
-        "fiscal_code": user.fiscal_code,
-        "phone": user.phone
-    }
-    return sendResponse(data, "", 200)
+
+@app.route('/me', methods=['GET'])
+def me():
+    return ifLogged(lambda user:
+                    sendResponse(parse_me(user), "", 200))
 
 
 @app.route('/me', methods=['POST'])
-def meUpdate():
-    user = get_current_user(request)
-    if user is None:
-        return jsonify({'message': 'user not logged'}), 401
-    body = request.get_json()
-
-    birth_date = body['birth_date']
-    if birth_date is not None:
-        birth_date = datetime.datetime.strptime(body['birth_date'], DATE_FORMAT_IN).date()
-
-    database.edit_instance(Users, id=user.id,
-                           birth_date=birth_date,
-                           fiscal_code=body['fiscal_code'],
-                           phone=body['phone'])
-
-    return sendResponse({}, "Updated", 200)
+def me_update():
+    return ifLogged(lambda user:
+                    doFinallyCatch(
+                        update_me(user, request),
+                        sendResponse({}, "Updated", 200),
+                        sendResponse({}, "Error", 503)
+                    ))
 
 
 @app.route('/me/reservations', methods=['GET'])
 def my_reservations():
-    user = get_current_user(request)
-    if user is None:
-        return jsonify({'message': 'user not logged'}), 401
-
-    my_reservations = database.get_reservations_of(user.id)
-    subscription_data = []
-    for sub in my_reservations:
-        subscription_data.append({
-            "reservation_type": sub.reservation_type,
-            "date": sub.date.strftime(DATE_FORMAT),
-            "time": sub.time.strftime(TIME_FORMAT),
-            "participant_number": sub.participant_number,
-            "slot": sub.slot
-        })
-    return sendResponse(subscription_data, "", 200)
+    return ifLogged(lambda user:
+                    sendResponse(parse_my_res(user), "", 200))
 
 
 @app.route('/users', methods=['GET'])
@@ -118,8 +105,8 @@ def fetchSlotsReservations():
             "time_to": s['time_to'].strftime(TIME_FORMAT),
             "max_capacity": s['max_capacity'],
             "current_reservations": s['current_reservations'],
-            "title" : s['title'],
-            "description" : s['description']
+            "title": s['title'],
+            "description": s['description']
         })
     return sendResponse(slots, "", 200)
 
@@ -135,7 +122,7 @@ def fetchLessonsReservations():
             "time": l['time'].strftime(TIME_FORMAT),
             "max_participants": l['max_participants'],
             "current_reservations": l['current_reservations'],
-            "course" : l['course'],
+            "course": l['course'],
             "course_description": l['course_description']
         })
     return sendResponse(lessons, "", 200)
@@ -150,7 +137,7 @@ def addSlot():
         return jsonify({'message': 'role not sufficient'}), 401
 
     body = request.get_json()
-    #TODO: check that timefrom < timeto
+    # TODO: check that timefrom < timeto
     database.add_instance(Slots,
                           id=str(uuid.uuid4()),
                           date=body['date'],
@@ -172,25 +159,27 @@ def addSlotReservation():
 
     body = request.get_json()
 
-    #database.begin_transaction() ---> sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Session.
-    #TODO Cercare di capire come evitare sql injections, o facciamo dei controlli sul parametro oppure bisogna cambiare modo di fare le query
+    # database.begin_transaction() ---> sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Session.
+    # TODO Cercare di capire come evitare sql injections, o facciamo dei controlli sul parametro oppure bisogna cambiare modo di fare le query
     db_is_space = database.check_if_space_for_slot_reservation(user.id)
-    is_space = db_is_space[0]['there_is_space']#TODO IVAN Controlla se sta roba funziona
+    is_space = db_is_space[0]['there_is_space']  # TODO IVAN Controlla se sta roba funziona
     if is_space == 0:
         return sendResponse({}, "Not enough space in slot", 401)
 
     reservation_id = str(uuid.uuid4())
     database.add_instance_no_commit(Reservations,
-                          id=reservation_id,
-                          customer = body['idUser'],
-                          room = '1')
+                                    id=reservation_id,
+                                    customer=body['idUser'],
+                                    room='1')
     database.add_instance_no_commit(WeightRoomReservations,
-                          reservation_number = 999, #FIXME TODO: MANDARGLI DA FRONT END/ fare query qui x prendersi il progressivo della reservation x quel determinato slot oppure eliminare il campo perche non viene mai usato
-                          reservation_id= reservation_id,
-                          slot = (body['idSlot']) )
+                                    reservation_number=999,
+                                    # FIXME TODO: MANDARGLI DA FRONT END/ fare query qui x prendersi il progressivo della reservation x quel determinato slot oppure eliminare il campo perche non viene mai usato
+                                    reservation_id=reservation_id,
+                                    slot=(body['idSlot']))
     database.commit_changes()
 
     return sendResponse({}, "Subscribed to slot", 200)
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def signup_user():
@@ -228,7 +217,7 @@ def login_user():
             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
             app.config['SECRET_KEY']
         )
-        return sendResponse({'token': token.decode('UTF-8')},"New token",200)
+        return sendResponse({'token': token.decode('UTF-8')}, "New token", 200)
 
     return sendResponse({'WWW.Authentication': 'Basic realm: "login required"'}, 'could not verify', 401)
 

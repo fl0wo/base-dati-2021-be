@@ -35,6 +35,9 @@ def get_current_user(request):
     except:
         return None
 
+def is_logged(request):
+    user = get_current_user(request)
+    return user is not None
 
 def check_user_role(user, desired_role):
     if user is None:
