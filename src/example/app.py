@@ -59,7 +59,9 @@ def meUpdate():
         return jsonify({'message': 'user not logged'}), 401
     body = request.get_json()
 
-    birth_date = datetime.datetime.strptime(body['birth_date'], DATE_FORMAT_IN)
+    birth_date = body['birth_date']
+    if birth_date is not None:
+        birth_date = datetime.datetime.strptime(body['birth_date'], DATE_FORMAT_IN)
 
     database.edit_instance(Users, id=user.id,
                            birth_date=birth_date.date(),
