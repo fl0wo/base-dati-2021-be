@@ -52,7 +52,7 @@ def me():
 
 
 @app.route('/me', methods=['UPDATE'])
-def me():
+def meUpdate():
     user = get_current_user(request)
     if user is None:
         return jsonify({'message': 'user not logged'}), 401
