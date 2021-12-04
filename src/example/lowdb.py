@@ -1,7 +1,6 @@
 import sqlalchemy
 from . import config
 from sqlalchemy.sql import text
-
 from sqlalchemy import (create_engine, DDL)
 
 from werkzeug.security import generate_password_hash, check_password_hash  # not constant due to salt adding (guarda rainbow table attack)
@@ -30,5 +29,11 @@ def perform_query(file):
 def perform_query_txt(query):
     return engine.execute(query)
 
+
 def populate_example():
-    perform_query(open("src/example/populate.sql"))
+    pwd = generate_password_hash('admin', method='sha256')
+    str = text(open("src/example/populate.sql").read())
+    perform_query_txt(str.params(PWD = pwd))
+
+
+

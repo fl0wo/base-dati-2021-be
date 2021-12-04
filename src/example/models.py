@@ -54,13 +54,13 @@ class Subscriptions(db.Model):
     user = db.Column(ID_TYPE, db.ForeignKey(Users.id), nullable=False)
 
 
-class Products(db.Model):
-    __table_name__ = "Products"
-    __table_args__ = {"schema": "gym"}
-
-    id = db.Column("id", ID_TYPE, primary_key=True)
-    description = db.Column("description", db.String(50))
-    price = db.Column("price", db.Numeric(15, 2), CheckConstraint("price > 0"))
+#class Products(db.Model):
+#    __table_name__ = "Products"
+#    __table_args__ = {"schema": "gym"}
+#
+#    id = db.Column("id", ID_TYPE, primary_key=True)
+#    description = db.Column("description", db.String(50))
+#    price = db.Column("price", db.Numeric(15, 2), CheckConstraint("price > 0"))
 
 
 class Transactions(db.Model):
@@ -72,7 +72,6 @@ class Transactions(db.Model):
     time = db.Column("time", db.Time)
     description = db.Column("description", db.String(50))
     subscription = db.Column("subscription", ID_TYPE, db.ForeignKey(Subscriptions.id), nullable=False)
-    product = db.Column("product", ID_TYPE, db.ForeignKey(Products.id), nullable=False)
 
 
 class Policies(db.Model):
@@ -187,4 +186,5 @@ class LessonReservation(db.Model):
 
 db.create_all()
 
-#populate_example()
+populate_example()
+
