@@ -30,7 +30,7 @@ from .controllers.user_controller import \
     parse_me, update_me, parse_my_res, users_all
 
 from .controllers.slot_controller import \
-    parse_slots, add_slot_reservation
+    parse_slots, add_slot_reservation, add_slot
 
 from .controllers.lesson_controller import \
     parse_lessons
@@ -59,7 +59,7 @@ def sendResponse(payload, msg, status):
 def doFinallyCatch(do, success, catch):
     try:
         do()
-    except:
+    except :
         return catch
     return success
 
@@ -98,7 +98,7 @@ def me():
 def me_update():
     return ifLogged(lambda user:
                     doFinallyCatch(
-                        update_me(user, request),
+                        lambda: update_me(user, request),
                         sendResponse({}, "Updated", 200),
                         sendResponse({}, "Error", 503)
                     ))
@@ -129,10 +129,10 @@ def fetch_lessons_reservations():
 
 
 @app.route('/slots/add', methods=['POST'])
-def add_slot():
+def add_slot_route():
     return ifManager(lambda user:
                      doFinallyCatch(
-                         update_me(user, request),
+                         lambda: add_slot(request),
                          sendResponse({}, "Added", 200),
                          sendResponse({}, "Error", 503)
                      ))
@@ -142,7 +142,7 @@ def add_slot():
 def add_slot_reservation():
     return ifLogged(lambda user:
                     doFinallyCatch(
-                        add_slot_reservation(user, request),
+                        lambda: add_slot_reservation(user, request),
                         sendResponse({}, "Added", 200),
                         sendResponse({}, "Error", 503)
                     ))
@@ -160,34 +160,28 @@ def signup_user():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login_user():
+    return always(lambda:
+                  doFinallyCatch(
+                      lambda: authenticate_user(request),
+                      sendResponse(authenticate_user(request),"New token", 200),
+                      sendResponse({}, 'Authentication failed', 200)
+                  ))
+
+
+def authenticate_user(request):
     auth = request.headers
     email = auth['username']
     try_password = auth['password']
     if not auth or not email or not try_password:
-        return sendResponse({'Authentication': 'Basic realm: "login required"'}, 'could not verify', 401)
+        raise ValueError('Auth required.')
     user = database.get_by_email(Users, email)
+    if user is None:
+        raise ValueError('User does not exist.')
     if check_password_hash(user.password, try_password):
         token = jwt.encode({
             'id': user.id,
             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
-            app.config['SECRET_KEY']
-        )
-        return sendResponse({'token': token.decode('UTF-8')}, "New token", 200)
-    return sendResponse({'WWW.Authentication': 'Basic realm: "login required"'}, 'could not verify', 401)
+            app.config['SECRET_KEY'])
+        return {'token': token.decode('UTF-8')}
+    raise Exception('Auth required.')
 
-# @app.route('/remove/<cat_id>', methods=['DELETE'])
-# def remove(cat_id):
-#     database.delete_instance(Cats, id=cat_id)
-#     r = Response
-#     r.message = json.dumps("Deleted")
-#     return jsonify(r);
-
-
-# @app.route('/edit/<cat_id>', methods=['PATCH'])
-# def edit(cat_id):
-#     data = request.get_json()
-#     new_price = data['price']
-#     database.edit_instance(Cats, id=cat_id, price=new_price)
-#     r = Response
-#     r.message = json.dumps("Edited")
-#     return jsonify(r);
