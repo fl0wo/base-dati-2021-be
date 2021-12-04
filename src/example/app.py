@@ -61,10 +61,10 @@ def meUpdate():
 
     birth_date = body['birth_date']
     if birth_date is not None:
-        birth_date = datetime.datetime.strptime(body['birth_date'], DATE_FORMAT_IN)
+        birth_date = datetime.datetime.strptime(body['birth_date'], DATE_FORMAT_IN).date()
 
     database.edit_instance(Users, id=user.id,
-                           birth_date=birth_date.date(),
+                           birth_date=birth_date,
                            fiscal_code=body['fiscal_code'],
                            phone=body['phone'])
 
