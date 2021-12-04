@@ -66,7 +66,7 @@ def me_update():
                     doFinallyCatch(
                         lambda: update_me(user, request),
                         sendResponse({}, "Updated", 200),
-                        sendResponse({}, "Error", 503)
+                        sendResponse({}, "Error", 400)
                     ))
 
 
@@ -119,7 +119,7 @@ def signup_user():
                   doFinallyCatch(
                       lambda: register_user(request.get_json()),
                       sendResponse({}, 'Registered successfully', 200),
-                      sendResponse({}, 'Already registered', 200)
+                      sendResponse({}, 'Already registered', 400)
                   ))
 
 
@@ -129,5 +129,5 @@ def login_user():
                   doFinallyCatch(
                       lambda: authenticate_user(request),
                       sendResponse(authenticate_user(request), "New token", 200),
-                      sendResponse({}, 'Authentication failed', 200)
+                      sendResponse({}, 'Authentication failed', 400)
                   ))
