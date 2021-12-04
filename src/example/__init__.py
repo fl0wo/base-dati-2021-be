@@ -10,9 +10,9 @@ def create_app():
     flask_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     flask_app.config['SECRET_KEY'] = config.secret
     flask_app.app_context().push()
-    db1 = flask_sqlalchemy.SQLAlchemy(flask_app)
-    db1.init_app(flask_app)
-    db1.create_all()
-    return flask_app, db1
+    #db1 = flask_sqlalchemy.SQLAlchemy(flask_app)
+    #db1.init_app(flask_app)
+    return flask_app
 
-app, db = create_app()
+
+app = create_app()

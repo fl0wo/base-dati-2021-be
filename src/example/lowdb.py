@@ -8,7 +8,7 @@ engine = sqlalchemy.create_engine(config.DATABASE_CONNECTION_URI)
 
 
 def define_schema(schema_name):
-    engine.execute(DDL("CREATE SCHEMA IF NOT EXISTS " + schema_name))
+    engine.execute(DDL("DROP SCHEMA IF EXISTS "+ schema_name+ " CASCADE ;CREATE SCHEMA IF NOT EXISTS " + schema_name))
 
 
 def define_trigger():
@@ -26,3 +26,6 @@ def perform_query(file):
 
 def perform_query_txt(query):
     return engine.execute(query)
+
+def populate_example():
+    perform_query(open("src/example/populate.sql"))
