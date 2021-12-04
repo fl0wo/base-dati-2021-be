@@ -34,9 +34,7 @@ from .controllers.slot_controller import \
 
 from .controllers.lesson_controller import \
     parse_lessons
-
-USER_NOT_LOGGED = jsonify({'message': 'user not logged'}), 401
-USER_NOT_AUTHORIZED = jsonify({'message': 'user not authorized'}), 401
+from .utils.domainutils import doFinallyCatch, always, ifLogged, ifAdmin, ifManager
 
 CORS(app)
 
@@ -54,38 +52,6 @@ def sendResponse(payload, msg, status):
     r.message = msg
     r.status = status
     return jsonify(r.toJSON()), status, basicHeaders
-
-
-def doFinallyCatch(do, success, catch):
-    try:
-        do()
-    except :
-        return catch
-    return success
-
-
-def always(f):
-    return f()
-
-
-def ifLogged(f):
-    user = get_current_user(request)
-    return f(user) if user is not None \
-        else USER_NOT_LOGGED
-
-
-def ifHasRole(f, role):
-    return ifLogged(lambda user: f(user)
-    if has_role(user, role)
-    else USER_NOT_AUTHORIZED)
-
-
-def ifAdmin(f):
-    return ifHasRole(f, ADMIN)
-
-
-def ifManager(f):
-    return ifHasRole(f, MANAGER)
 
 
 @app.route('/me', methods=['GET'])
@@ -118,8 +84,7 @@ def all_users():
 
 @app.route('/slots/reservations', methods=['GET'])
 def fetch_slots_reservations():
-    return always(lambda:
-                  sendResponse(parse_slots(), "", 200))
+    return always(lambda: sendResponse(parse_slots(), "", 200))
 
 
 @app.route('/lessons/reservations', methods=['GET'])

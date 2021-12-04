@@ -103,7 +103,8 @@ def register_user(data):
                           email=data['email'],
                           password=hashed_password,
                           name=data['name'],
-                          surname=data['surname'])
+                          surname=data['surname'],
+                          role=CUSTOMER)
 
 
 def authenticate_user(request):
@@ -111,14 +112,14 @@ def authenticate_user(request):
     email = auth['username']
     try_password = auth['password']
     if not auth or not email or not try_password:
-        raise ValueError('Auth required.')
+        return False
     user = database.get_by_email(Users, email)
     if user is None:
-        raise ValueError('User does not exist.')
+        return False
     if check_password_hash(user.password, try_password):
         token = jwt.encode({
             'id': user.id,
             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
             app.config['SECRET_KEY'])
         return {'token': token.decode('UTF-8')}
-    raise Exception('Auth required.')
+    return False
