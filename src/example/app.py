@@ -1,22 +1,42 @@
 import json
-from flask import current_app, flash, jsonify, make_response, redirect, request, url_for
-from flask_cors import CORS
-from . import app, database
-from .models import Cats, Users, Slots, Reservations, WeightRoomReservations
-from .security import admin_required, get_current_user, get_current_admin, get_current_manager, is_logged
-from .response import Response, DATE_FORMAT, DATE_FORMAT_IN, TIME_FORMAT
-from werkzeug.security import generate_password_hash, \
-    check_password_hash  # not constant due to salt adding (guarda rainbow table attack)
 import uuid
 import jwt
 import datetime
 from functools import wraps
 
+from flask import current_app, flash, \
+    jsonify, make_response, redirect, request, \
+    url_for
+
+from flask_cors import CORS
+
+from . import app, database
+
+from .models import Cats, Users, Slots, Reservations, \
+    WeightRoomReservations
+
+from .security import admin_required, \
+    get_current_user, \
+    get_current_manager, is_logged, has_role, \
+    ADMIN, MANAGER, CUSTOMER, TRAINER
+
+from .response import Response, DATE_FORMAT, \
+    DATE_FORMAT_IN, TIME_FORMAT
+
+from werkzeug.security import generate_password_hash, \
+    check_password_hash  # not constant due to salt adding (guarda rainbow table attack)
+
 from .controllers.user_controller import \
-    parse_me, update_me, parse_my_res
+    parse_me, update_me, parse_my_res, users_all
 
 from .controllers.slot_controller import \
     parse_slots
+
+from .controllers.lesson_controller import \
+    parse_lessons
+
+USER_NOT_LOGGED = jsonify({'message': 'user not logged'}), 401
+USER_NOT_AUTHORIZED = jsonify({'message': 'user not authorized'}), 401
 
 CORS(app)
 
@@ -52,8 +72,14 @@ def always(f):
 def ifLogged(f):
     user = get_current_user(request)
     if user is None:
-        return jsonify({'message': 'user not logged'}), 401
+        return USER_NOT_LOGGED
     return f(user)
+
+
+def ifAdmin(f):
+    return ifLogged(lambda user: f(user)
+    if has_role(user, ADMIN)
+    else USER_NOT_AUTHORIZED)
 
 
 @app.route('/me', methods=['GET'])
@@ -79,25 +105,9 @@ def my_reservations():
 
 
 @app.route('/users', methods=['GET'])
-def fetch():
-    admin = get_current_admin(request)
-    if admin is None:
-        return jsonify({'message': 'user not logged'}), 401
-    if admin is False:
-        return jsonify({'message': 'role not sufficient'}), 401
-
-    dbusers = database.get_all(Users)
-    users = []
-    for user in dbusers:
-        users.append({
-            "name": user.name,
-            "surname": user.surname,
-            "role": user.role,
-            "email": user.email,
-            "birth_date": user.birth_date.strftime(DATE_FORMAT),
-            "fiscal_code": user.fiscal_code
-        })
-    return sendResponse(json.dumps(users), "", 200)
+def all_users():
+    return ifAdmin(lambda user:
+                   sendResponse(users_all(), "", 200))
 
 
 @app.route('/slots/reservations', methods=['GET'])
@@ -108,19 +118,8 @@ def fetch_slots_reservations():
 
 @app.route('/lessons/reservations', methods=['GET'])
 def fetch_lessons_reservations():
-    dbLessons = database.get_all_lessons_curent_reservation()
-    lessons = []
-    for l in dbLessons:
-        lessons.append({
-            "id": l['id'],
-            "date": (l['date']).strftime(DATE_FORMAT),
-            "time": l['time'].strftime(TIME_FORMAT),
-            "max_participants": l['max_participants'],
-            "current_reservations": l['current_reservations'],
-            "course": l['course'],
-            "course_description": l['course_description']
-        })
-    return sendResponse(lessons, "", 200)
+    return always(lambda:
+                  sendResponse(parse_lessons(), "", 200))
 
 
 @app.route('/slots/add', methods=['POST'])

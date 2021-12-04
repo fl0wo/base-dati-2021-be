@@ -2,7 +2,7 @@ from ..models import Users
 from .. import app, database
 from datetime import datetime
 from ..response import Response, DATE_FORMAT, DATE_FORMAT_IN, TIME_FORMAT
-
+from ..utils.dateutils import format_date
 
 def parse_me(user: Users):
     return {
@@ -14,6 +14,7 @@ def parse_me(user: Users):
         "fiscal_code": user.fiscal_code,
         "phone": user.phone
     }
+
 
 def update_me(user, request):
     body = request.get_json()
@@ -39,3 +40,17 @@ def parse_my_res(user):
             "slot": sub.slot
         })
     return subscription_data
+
+def users_all():
+    db_users = database.get_all(Users)
+    users = []
+    for user in db_users:
+        users.append({
+            "name": user.name,
+            "surname": user.surname,
+            "role": user.role,
+            "email": user.email,
+            "birth_date": format_date(user.birth_date),
+            "fiscal_code": user.fiscal_code
+        })
+    return users

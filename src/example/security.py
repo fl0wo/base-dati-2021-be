@@ -39,22 +39,17 @@ def is_logged(request):
     user = get_current_user(request)
     return user is not None
 
-def check_user_role(user, desired_role):
+def has_role(user, desired_role):
     if user is None:
         return None
     if rolelvl(user.role) < rolelvl(desired_role):
         return False
-    return user
-
-
-def get_current_admin(request):
-    user = get_current_user(request)
-    return check_user_role(user, ADMIN)
+    return True
 
 
 def get_current_manager(request):
     user = get_current_user(request)
-    return check_user_role(user, MANAGER)
+    return has_role(user, MANAGER)
 
 
 def get_token(headers):
