@@ -51,7 +51,7 @@ def me():
     return sendResponse(data, "", 200)
 
 
-@app.route('/me', methods=['UPDATE'])
+@app.route('/me', methods=['PUT'])
 def meUpdate():
     user = get_current_user(request)
     if user is None:
