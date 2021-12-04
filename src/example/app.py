@@ -6,8 +6,7 @@ from . import app, database
 from .models import Cats, Users, Slots, Reservations, WeightRoomReservations
 from .security import admin_required, get_current_user, get_current_admin, get_current_manager
 from .response import Response
-from werkzeug.security import generate_password_hash, \
-    check_password_hash  # not constant due to salt adding (guarda rainbow table attack)
+from werkzeug.security import generate_password_hash, check_password_hash  # not constant due to salt adding (guarda rainbow table attack)
 import uuid
 import jwt
 import datetime

@@ -4,6 +4,9 @@ from sqlalchemy.sql import text
 
 from sqlalchemy import (create_engine, DDL)
 
+from werkzeug.security import generate_password_hash, check_password_hash  # not constant due to salt adding (guarda rainbow table attack)
+
+
 engine = sqlalchemy.create_engine(config.DATABASE_CONNECTION_URI)
 
 
