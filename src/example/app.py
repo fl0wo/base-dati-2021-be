@@ -49,7 +49,7 @@ def me():
         "email": user.email,
         "birth_date" : user.birth_date,
         "fiscal_code": user.fiscal_code,
-        "phone": phone
+        "phone": user.phone
     }
     return sendResponse(data, "", 200)
 
