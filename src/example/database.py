@@ -27,7 +27,8 @@ def delete_instance(model, id):
 def edit_instance(model, id, **kwargs):
     instance = model.query.filter_by(id=id).first()
     for attr, new_value in kwargs.items():
-        setattr(instance, attr, new_value)
+        if new_value is not None:
+            setattr(instance, attr, new_value)
     commit_changes()
 
 
