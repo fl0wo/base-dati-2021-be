@@ -3,13 +3,13 @@ import sqlalchemy
 from sqlalchemy import (Column, Integer, String, Numeric, CheckConstraint, UniqueConstraint, Date)
 from sqlalchemy.sql import func
 from .lowdb import define_schema#, define_trigger, define_roles
+from . import db
 
 define_schema("gym")
 
 #define_trigger()
 #define_roles()
 
-db = flask_sqlalchemy.SQLAlchemy()
 
 ID_TYPE = db.String(36)
 
@@ -183,3 +183,16 @@ class LessonReservation(db.Model):
                                primary_key=True, nullable=False)
     lesson = db.Column("lesson", ID_TYPE, db.ForeignKey(Lessons.id), nullable=False)
 
+#class slotsWithCurrentReservationV(db.Model):
+#    __table__ = db.Table('slots_with_current_reservation_V', db.metadata,
+#                         db.Column("id", ID_TYPE, primary_key=True),
+#                         db.Column("date", db.Date),
+#                         db.Column("time_from", db.Time),
+#                         db.Column("time_to", db.Time),
+#                         db.Column("max_capacity", db.Integer, CheckConstraint("max_capacity > 0"), default=20),
+#                         db.Column("title", db.String(40)),
+#                         db.Column("description", db.String(150)),
+#                         db.Column("max_capacity", db.Integer),
+#                         autoload=True,
+#                         autoload_with=db.engine
+#                         )

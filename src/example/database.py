@@ -1,4 +1,4 @@
-from .models import db
+from . import db
 import sqlalchemy
 from .lowdb import perform_query_txt
 

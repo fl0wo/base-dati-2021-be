@@ -2,7 +2,7 @@ import json
 
 from flask import current_app, flash, jsonify, make_response, redirect, request, url_for
 from flask_cors import CORS
-from . import create_app, database
+from . import app, database
 from .models import Cats, Users, Slots, Reservations, WeightRoomReservations
 from .security import admin_required, get_current_user, get_current_admin, get_current_manager
 from .response import Response
@@ -17,7 +17,6 @@ DATE_FORMAT = '%Y/%m/%d'
 DATE_FORMAT_IN = '%Y-%m-%d'
 TIME_FORMAT = "%H:%M:%S"
 
-app = create_app()
 CORS(app)
 
 basicHeaders = [
