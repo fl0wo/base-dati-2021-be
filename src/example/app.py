@@ -1,30 +1,10 @@
-import json
-import uuid
-import jwt
-import datetime
-from functools import wraps
-
-from flask import current_app, flash, \
-    jsonify, make_response, redirect, request, \
-    url_for
-
+from flask import jsonify, request
 from flask_cors import CORS
+from . import app
 
-from . import app, database
+from .security import register_user, authenticate_user
 
-from .models import Cats, Users, Slots, Reservations, \
-    WeightRoomReservations
-
-from .security import admin_required, \
-    get_current_user, \
-    get_current_manager, is_logged, has_role, \
-    ADMIN, MANAGER, CUSTOMER, TRAINER, register_user, authenticate_user
-
-from .response import Response, DATE_FORMAT, \
-    DATE_FORMAT_IN, TIME_FORMAT
-
-from werkzeug.security import generate_password_hash, \
-    check_password_hash  # not constant due to salt adding (guarda rainbow table attack)
+from .response import Response
 
 from .controllers.user_controller import \
     parse_me, update_me, parse_my_res, users_all
@@ -34,7 +14,9 @@ from .controllers.slot_controller import \
 
 from .controllers.lesson_controller import \
     parse_lessons
-from .utils.domainutils import doFinallyCatch, always, ifLogged, ifAdmin, ifManager
+
+from .utils.domainutils import doFinallyCatch, \
+    always, ifLogged, ifAdmin, ifManager
 
 CORS(app)
 

@@ -1,6 +1,5 @@
 from ..security import get_current_user, has_role, ADMIN, MANAGER, TRAINER
-
-from flask import jsonify
+from flask import jsonify,request
 
 USER_NOT_LOGGED = jsonify({'message': 'user not logged'}), 401
 USER_NOT_AUTHORIZED = jsonify({'message': 'user not authorized'}), 401

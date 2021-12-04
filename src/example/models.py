@@ -7,20 +7,7 @@ from . import app
 
 define_schema("gym")
 db = flask_sqlalchemy.SQLAlchemy(app)
-
-#define_trigger()
-#define_roles()
-
-
 ID_TYPE = db.String(36)
-
-
-class Cats(db.Model):
-    __tablename__ = 'cats'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    price = db.Column(db.Integer)
-    breed = db.Column(db.String(100))
 
 
 class Users(db.Model):
@@ -187,4 +174,7 @@ class LessonReservation(db.Model):
 db.create_all()
 
 populate_example()
+
+#define_trigger()
+#define_roles()
 
