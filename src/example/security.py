@@ -5,7 +5,7 @@ import jwt
 import datetime
 from functools import wraps
 
-from . import config, database
+from . import config, database, app
 from .database import get_by_id
 from .models import Users
 
@@ -104,3 +104,21 @@ def register_user(data):
                           password=hashed_password,
                           name=data['name'],
                           surname=data['surname'])
+
+
+def authenticate_user(request):
+    auth = request.headers
+    email = auth['username']
+    try_password = auth['password']
+    if not auth or not email or not try_password:
+        raise ValueError('Auth required.')
+    user = database.get_by_email(Users, email)
+    if user is None:
+        raise ValueError('User does not exist.')
+    if check_password_hash(user.password, try_password):
+        token = jwt.encode({
+            'id': user.id,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
+            app.config['SECRET_KEY'])
+        return {'token': token.decode('UTF-8')}
+    raise Exception('Auth required.')

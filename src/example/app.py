@@ -18,7 +18,7 @@ from .models import Cats, Users, Slots, Reservations, \
 from .security import admin_required, \
     get_current_user, \
     get_current_manager, is_logged, has_role, \
-    ADMIN, MANAGER, CUSTOMER, TRAINER, register_user
+    ADMIN, MANAGER, CUSTOMER, TRAINER, register_user, authenticate_user
 
 from .response import Response, DATE_FORMAT, \
     DATE_FORMAT_IN, TIME_FORMAT
@@ -163,25 +163,6 @@ def login_user():
     return always(lambda:
                   doFinallyCatch(
                       lambda: authenticate_user(request),
-                      sendResponse(authenticate_user(request),"New token", 200),
+                      sendResponse(authenticate_user(request), "New token", 200),
                       sendResponse({}, 'Authentication failed', 200)
                   ))
-
-
-def authenticate_user(request):
-    auth = request.headers
-    email = auth['username']
-    try_password = auth['password']
-    if not auth or not email or not try_password:
-        raise ValueError('Auth required.')
-    user = database.get_by_email(Users, email)
-    if user is None:
-        raise ValueError('User does not exist.')
-    if check_password_hash(user.password, try_password):
-        token = jwt.encode({
-            'id': user.id,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)},
-            app.config['SECRET_KEY'])
-        return {'token': token.decode('UTF-8')}
-    raise Exception('Auth required.')
-
