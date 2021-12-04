@@ -51,6 +51,21 @@ def me():
     return sendResponse(data, "", 200)
 
 
+@app.route('/me', methods=['UPDATE'])
+def me():
+    user = get_current_user(request)
+    if user is None:
+        return jsonify({'message': 'user not logged'}), 401
+    body = request.get_json()
+
+    database.edit_instance(Users, id=user.id,
+                           birth_date=body.birth_date.strftime(DATE_FORMAT),
+                           fiscal_code=body.fiscal_code,
+                           phone=body.phone)
+
+    return sendResponse({}, "Updated", 200)
+
+
 @app.route('/me/subscriptions', methods=['GET'])
 def my_subscriptions():
     user = get_current_user(request)
