@@ -45,14 +45,14 @@ def me():
         "surname": user.surname,
         "role": user.role,
         "email": user.email,
-        "birth_date" : user.birth_date,
+        "birth_date": user.birth_date,
         "fiscal_code": user.fiscal_code,
         "phone": user.phone
     }
     return sendResponse(data, "", 200)
 
 
-@app.route('/me', methods=['PATCH'])
+@app.route('/me', methods=['POST'])
 def meUpdate():
     user = get_current_user(request)
     if user is None:
@@ -69,15 +69,15 @@ def meUpdate():
     return sendResponse({}, "Updated", 200)
 
 
-@app.route('/me/subscriptions', methods=['GET'])
-def my_subscriptions():
+@app.route('/me/reservations', methods=['GET'])
+def my_reservations():
     user = get_current_user(request)
     if user is None:
         return jsonify({'message': 'user not logged'}), 401
 
-    db_subscription = database.get_subscriptions_of(user.id)
+    my_reservations = database.get_reservations_of(user.id)
     subscription_data = []
-    for sub in db_subscription:
+    for sub in my_reservations:
         subscription_data.append({
             "reservation_type": sub.reservation_type,
             "date": sub.date.strftime(DATE_FORMAT),
@@ -110,7 +110,7 @@ def fetch():
     return sendResponse(json.dumps(users), "", 200)
 
 
-@app.route('/slotsReservations', methods=['GET'])
+@app.route('/slots/reservations', methods=['GET'])
 def fetchSlotsReservations():
     dbSlots = database.get_all_slots_curent_reservation()
     slots = []
@@ -128,7 +128,7 @@ def fetchSlotsReservations():
     return sendResponse(slots, "", 200)
 
 
-@app.route('/lessonsReservations', methods=['GET'])
+@app.route('/lessons/reservations', methods=['GET'])
 def fetchLessonsReservations():
     dbLessons = database.get_all_lessons_curent_reservation()
     lessons = []
@@ -173,14 +173,12 @@ def addSlotReservation():
     user = get_current_user(request)
     if user is None:
         return jsonify({'message': 'user not logged'}), 401
-    if user is False:
-        return jsonify({'message': 'role not sufficient'}), 401
 
     body = request.get_json()
 
     #database.begin_transaction() ---> sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Session.
     #TODO Cercare di capire come evitare sql injections, o facciamo dei controlli sul parametro oppure bisogna cambiare modo di fare le query
-    db_is_space = database.check_if_space_for_slot_reservation(body['idSlot'])
+    db_is_space = database.check_if_space_for_slot_reservation(user.id)
     is_space = db_is_space[0]['there_is_space']#TODO IVAN Controlla se sta roba funziona
     if is_space == 0:
         return sendResponse({}, "Not enough space in slot", 401)

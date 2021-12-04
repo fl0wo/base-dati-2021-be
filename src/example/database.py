@@ -63,7 +63,7 @@ def check_if_space_for_slot_reservation(slotId):
     return result_as_list
 
 
-def get_subscriptions_of(userId):
+def get_reservations_of(userId):
     sql_query = sqlalchemy.text("SELECT 'lesson' as reservation_type,r.id,r.date,r.time,r.customer,r.room,l.participant_number,l.reservation_id,l.lesson as slot FROM gym.reservations r RIGHT JOIN gym.lesson_reservation l on r.id = l.reservation_id WHERE r.customer='"+ userId + "' UNION ALL SELECT 'weightroom' as reservation_type,* FROM gym.reservations r RIGHT JOIN gym.weight_room_reservations on r.id = weight_room_reservations.reservation_id WHERE r.customer='"+userId +"'")
     result = perform_query_txt(sql_query)
     result_as_list = result.fetchall()
