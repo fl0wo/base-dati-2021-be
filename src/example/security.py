@@ -5,7 +5,7 @@ import jwt
 import datetime
 from functools import wraps
 
-from . import config
+from . import config, database
 from .database import get_by_id
 from .models import Users
 
@@ -35,9 +35,11 @@ def get_current_user(request):
     except:
         return None
 
+
 def is_logged(request):
     user = get_current_user(request)
     return user is not None
+
 
 def has_role(user, desired_role):
     if user is None:
@@ -57,7 +59,6 @@ def get_token(headers):
 
 
 def get_decorator():
-
     def decorator(func):
 
         def new_func(*args, **kwargs):
@@ -93,3 +94,13 @@ def admin_required(func):
 
 def manager_required(func):
     return role_required(func, "manager")
+
+
+def register_user(data):
+    hashed_password = generate_password_hash(data['password'], method='sha256')
+    database.add_instance(Users,
+                          id=str(uuid.uuid4()),
+                          email=data['email'],
+                          password=hashed_password,
+                          name=data['name'],
+                          surname=data['surname'])

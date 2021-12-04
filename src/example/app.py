@@ -18,7 +18,7 @@ from .models import Cats, Users, Slots, Reservations, \
 from .security import admin_required, \
     get_current_user, \
     get_current_manager, is_logged, has_role, \
-    ADMIN, MANAGER, CUSTOMER, TRAINER
+    ADMIN, MANAGER, CUSTOMER, TRAINER, register_user
 
 from .response import Response, DATE_FORMAT, \
     DATE_FORMAT_IN, TIME_FORMAT
@@ -30,7 +30,7 @@ from .controllers.user_controller import \
     parse_me, update_me, parse_my_res, users_all
 
 from .controllers.slot_controller import \
-    parse_slots
+    parse_slots, add_slot_reservation
 
 from .controllers.lesson_controller import \
     parse_lessons
@@ -61,8 +61,7 @@ def doFinallyCatch(do, success, catch):
         do()
     except:
         return catch
-    finally:
-        return success
+    return success
 
 
 def always(f):
@@ -71,15 +70,22 @@ def always(f):
 
 def ifLogged(f):
     user = get_current_user(request)
-    if user is None:
-        return USER_NOT_LOGGED
-    return f(user)
+    return f(user) if user is not None \
+        else USER_NOT_LOGGED
+
+
+def ifHasRole(f, role):
+    return ifLogged(lambda user: f(user)
+    if has_role(user, role)
+    else USER_NOT_AUTHORIZED)
 
 
 def ifAdmin(f):
-    return ifLogged(lambda user: f(user)
-    if has_role(user, ADMIN)
-    else USER_NOT_AUTHORIZED)
+    return ifHasRole(f, ADMIN)
+
+
+def ifManager(f):
+    return ifHasRole(f, MANAGER)
 
 
 @app.route('/me', methods=['GET'])
@@ -123,88 +129,43 @@ def fetch_lessons_reservations():
 
 
 @app.route('/slots/add', methods=['POST'])
-def addSlot():
-    manager = get_current_manager(request)
-    if manager is None:
-        return jsonify({'message': 'user not logged'}), 401
-    if manager is False:
-        return jsonify({'message': 'role not sufficient'}), 401
-
-    body = request.get_json()
-    # TODO: check that timefrom < timeto
-    database.add_instance(Slots,
-                          id=str(uuid.uuid4()),
-                          date=body['date'],
-                          time_from=body['time_from'],
-                          time_to=body['time_to'],
-                          max_capacity=body['max_capacity'],  # TODO: check if > 1
-                          title=body['title'],
-                          description=body['description'],
-                          )
-
-    return sendResponse({}, "Added", 200)
+def add_slot():
+    return ifManager(lambda user:
+                     doFinallyCatch(
+                         update_me(user, request),
+                         sendResponse({}, "Added", 200),
+                         sendResponse({}, "Error", 503)
+                     ))
 
 
 @app.route('/slots/reservation', methods=['POST'])
-def addSlotReservation():
-    user = get_current_user(request)
-    if user is None:
-        return jsonify({'message': 'user not logged'}), 401
-
-    body = request.get_json()
-
-    # database.begin_transaction() ---> sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Session.
-    # TODO Cercare di capire come evitare sql injections, o facciamo dei controlli sul parametro oppure bisogna cambiare modo di fare le query
-    db_is_space = database.check_if_space_for_slot_reservation(body['idSlot'])
-    is_space = db_is_space[0]['there_is_space']  # TODO IVAN Controlla se sta roba funziona
-    if is_space == 0:
-        return sendResponse({}, "Not enough space in slot", 401)
-
-    reservation_id = str(uuid.uuid4())
-    database.add_instance_no_commit(Reservations,
-                                    id=reservation_id,
-                                    customer=body['idUser'],
-                                    room='1')
-    database.add_instance_no_commit(WeightRoomReservations,
-                                    reservation_number=999,
-                                    # FIXME TODO: MANDARGLI DA FRONT END/ fare query qui x prendersi il progressivo della reservation x quel determinato slot oppure eliminare il campo perche non viene mai usato
-                                    reservation_id=reservation_id,
-                                    slot=(body['idSlot']))
-    database.commit_changes()
-
-    return sendResponse({}, "Subscribed to slot", 200)
+def add_slot_reservation():
+    return ifLogged(lambda user:
+                    doFinallyCatch(
+                        add_slot_reservation(user, request),
+                        sendResponse({}, "Added", 200),
+                        sendResponse({}, "Error", 503)
+                    ))
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def signup_user():
-    data = request.get_json()
-
-    hashed_password = generate_password_hash(data['password'], method='sha256')
-
-    try:
-        database.add_instance(Users,
-                              id=str(uuid.uuid4()),
-                              email=data['email'],
-                              password=hashed_password,
-                              name=data['name'],
-                              surname=data['surname'])
-    except:
-        return sendResponse({}, 'already registered', 200)
-
-    return sendResponse({}, 'registered successfully', 200)
+    return always(lambda:
+                  doFinallyCatch(
+                      lambda: register_user(request.get_json()),
+                      sendResponse({}, 'Registered successfully', 200),
+                      sendResponse({}, 'Already registered', 200)
+                  ))
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login_user():
     auth = request.headers
-
     email = auth['username']
     try_password = auth['password']
     if not auth or not email or not try_password:
         return sendResponse({'Authentication': 'Basic realm: "login required"'}, 'could not verify', 401)
-
     user = database.get_by_email(Users, email)
-
     if check_password_hash(user.password, try_password):
         token = jwt.encode({
             'id': user.id,
@@ -212,7 +173,6 @@ def login_user():
             app.config['SECRET_KEY']
         )
         return sendResponse({'token': token.decode('UTF-8')}, "New token", 200)
-
     return sendResponse({'WWW.Authentication': 'Basic realm: "login required"'}, 'could not verify', 401)
 
 # @app.route('/remove/<cat_id>', methods=['DELETE'])
