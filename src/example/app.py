@@ -12,8 +12,11 @@ import jwt
 import datetime
 from functools import wraps
 
-from .controllers.user_controller import parse_me,\
-    update_me,parse_my_res
+from .controllers.user_controller import \
+    parse_me, update_me, parse_my_res
+
+from .controllers.slot_controller import \
+    parse_slots
 
 CORS(app)
 
@@ -40,6 +43,10 @@ def doFinallyCatch(do, success, catch):
         return catch
     finally:
         return success
+
+
+def always(f):
+    return f()
 
 
 def ifLogged(f):
@@ -94,25 +101,13 @@ def fetch():
 
 
 @app.route('/slots/reservations', methods=['GET'])
-def fetchSlotsReservations():
-    dbSlots = database.get_all_slots_curent_reservation()
-    slots = []
-    for s in dbSlots:
-        slots.append({
-            "id": s['id'],
-            "date": (s['date']).strftime(DATE_FORMAT),
-            "time_from": s['time_from'].strftime(TIME_FORMAT),
-            "time_to": s['time_to'].strftime(TIME_FORMAT),
-            "max_capacity": s['max_capacity'],
-            "current_reservations": s['current_reservations'],
-            "title": s['title'],
-            "description": s['description']
-        })
-    return sendResponse(slots, "", 200)
+def fetch_slots_reservations():
+    return always(lambda:
+                  sendResponse(parse_slots(), "", 200))
 
 
 @app.route('/lessons/reservations', methods=['GET'])
-def fetchLessonsReservations():
+def fetch_lessons_reservations():
     dbLessons = database.get_all_lessons_curent_reservation()
     lessons = []
     for l in dbLessons:
