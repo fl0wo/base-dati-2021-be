@@ -1,20 +1,15 @@
 import json
-
 from flask import current_app, flash, jsonify, make_response, redirect, request, url_for
 from flask_cors import CORS
 from . import app, database
 from .models import Cats, Users, Slots, Reservations, WeightRoomReservations
 from .security import admin_required, get_current_user, get_current_admin, get_current_manager
-from .response import Response
+from .response import Response, DATE_FORMAT, DATE_FORMAT_IN, TIME_FORMAT
 from werkzeug.security import generate_password_hash, check_password_hash  # not constant due to salt adding (guarda rainbow table attack)
 import uuid
 import jwt
 import datetime
 from functools import wraps
-
-DATE_FORMAT = '%Y/%m/%d'
-DATE_FORMAT_IN = '%Y-%m-%d'
-TIME_FORMAT = "%H:%M:%S"
 
 CORS(app)
 
@@ -24,7 +19,6 @@ basicHeaders = [
     ('Access-Control-Allow-Headers', 'Authorization, Content-Type'),
     ('Access-Control-Allow-Methods', 'POST'),
 ]
-
 
 def sendResponse(payload, msg, status):
     r = Response()
