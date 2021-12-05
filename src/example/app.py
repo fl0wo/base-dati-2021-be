@@ -18,13 +18,7 @@ from .controllers.lesson_controller import \
 from .utils.domainutils import doFinallyCatch, \
     always, ifLogged, ifAdmin, ifManager
 
-from flask import send_from_directory
-
-
-
-import os
-from flask import Flask, flash, request, redirect, url_for
-from werkzeug.utils import secure_filename
+from .utils.fileuploaderutils import upload_file, download_profilepic
 
 CORS(app)
 
@@ -67,26 +61,10 @@ def me_profilepic():
                         sendResponse({}, "Error", 400)
                     ))
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def upload_file(user_id):
-    if 'file' not in request.files:
-        return '1'
-    file = request.files['file']
-    if file.filename == '':
-        return '2'
-    if file and allowed_file(file.filename):
-        file_upd = user_id
-        filename = secure_filename(file_upd) + "." + file.filename.rsplit('.', 1)[1].lower()
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return 'True'
-
 @app.route('/me/profilepic',methods=['GET'])
 def download_file():
     return ifLogged(lambda user:
-                    send_from_directory(app.config["UPLOAD_FOLDER"], user.id+'.jpg'))
+                    download_profilepic(user.id))
 
 @app.route('/me/reservations', methods=['GET'])
 def my_reservations():
