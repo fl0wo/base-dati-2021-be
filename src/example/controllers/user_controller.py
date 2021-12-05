@@ -1,4 +1,4 @@
-from ..models import Users
+from ..models import Users, Courses
 from .. import app, database
 from datetime import datetime
 from ..response import Response, DATE_FORMAT, DATE_FORMAT_IN, TIME_FORMAT
@@ -54,3 +54,15 @@ def users_all():
             "fiscal_code": user.fiscal_code
         })
     return users
+
+def courses_all():
+    db_courses = database.get_all(Courses)
+    courses = []
+    for course in db_courses:
+        courses.append({
+            "id": course.id,
+            "name": course.name,
+            "description": course.description,
+            "trainer": course.trainer
+        })
+    return courses

@@ -36,6 +36,17 @@ def add_slot(request):
                           description=body['description'],
                           )
 
+def add_lesson(request):
+    body = request.get_json()
+    # TODO: check that timefrom < timeto
+    database.add_instance(Lessons,
+                          id=str(uuid.uuid4()),
+                          date=body['date'],
+                          time=body['time'],
+                          max_participants=body['max_participants'],  # TODO: check if > 1
+                          course=body['course']
+                          )
+
 
 def add_slot_reservation(user, request):
     body = request.get_json()

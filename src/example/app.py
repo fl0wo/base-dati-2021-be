@@ -7,16 +7,16 @@ from .security import register_user, authenticate_user
 from .response import Response
 
 from .controllers.user_controller import \
-    parse_me, update_me, parse_my_res, users_all
+    parse_me, update_me, parse_my_res, users_all, courses_all
 
 from .controllers.slot_controller import \
-    parse_slots, add_slot_reservation, add_slot
+    parse_slots, add_slot_reservation, add_slot, add_lesson
 
 from .controllers.lesson_controller import \
     parse_lessons
 
 from .utils.domainutils import doFinallyCatch, \
-    always, ifLogged, ifAdmin, ifManager
+    always, ifLogged, ifAdmin, ifManager, ifTrainer
 
 from .utils.fileuploaderutils import upload_file, download_profilepic
 
@@ -98,6 +98,14 @@ def add_slot_route():
                          sendResponse({}, "Error", 503)
                      ))
 
+@app.route('/lessons/add', methods=['POST'])
+def add_lesson_route():
+    return ifTrainer(lambda user:
+                     doFinallyCatch(
+                         lambda: add_lesson(request),
+                         sendResponse({}, "Added", 200),
+                         sendResponse({}, "Error", 503)
+                     ))
 
 @app.route('/slots/reservation', methods=['POST'])
 def add_slot_reservation():
@@ -108,6 +116,10 @@ def add_slot_reservation():
                         sendResponse({}, "Error", 503)
                     ))
 
+@app.route('/courses/all', methods=['GET'])
+def fetch_all_courses():
+    return ifTrainer(lambda user:
+                   sendResponse(courses_all(), "", 200))
 
 @app.route('/register', methods=['GET', 'POST'])
 def signup_user():
