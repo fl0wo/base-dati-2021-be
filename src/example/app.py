@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from flask_cors import CORS
-from . import app
+from . import app , UPLOAD_FOLDER, ALLOWED_EXTENSIONS
 
 from .security import register_user, authenticate_user
 
@@ -18,6 +18,14 @@ from .controllers.lesson_controller import \
 from .utils.domainutils import doFinallyCatch, \
     always, ifLogged, ifAdmin, ifManager
 
+from flask import send_from_directory
+
+
+
+import os
+from flask import Flask, flash, request, redirect, url_for
+from werkzeug.utils import secure_filename
+
 CORS(app)
 
 basicHeaders = [
@@ -27,13 +35,12 @@ basicHeaders = [
     ('Access-Control-Allow-Methods', 'POST'),
 ]
 
-
 def sendResponse(payload, msg, status):
     r = Response()
     r.data = payload
     r.message = msg
     r.status = status
-    return jsonify(r.toJSON()), status, basicHeaders
+    return jsonify(r.toJSON()), 200, basicHeaders
 
 
 @app.route('/me', methods=['GET'])
@@ -51,6 +58,35 @@ def me_update():
                         sendResponse({}, "Error", 400)
                     ))
 
+@app.route('/me/profilepic', methods=['POST'])
+def me_profilepic():
+    return ifLogged(lambda user:
+                    doFinallyCatch(
+                        lambda: upload_file(user.id),
+                        sendResponse({}, "Uploaded", 200),
+                        sendResponse({}, "Error", 400)
+                    ))
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def upload_file(user_id):
+    if 'file' not in request.files:
+        return '1'
+    file = request.files['file']
+    if file.filename == '':
+        return '2'
+    if file and allowed_file(file.filename):
+        file_upd = user_id
+        filename = secure_filename(file_upd) + "." + file.filename.rsplit('.', 1)[1].lower()
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return 'True'
+
+@app.route('/me/profilepic',methods=['GET'])
+def download_file():
+    return ifLogged(lambda user:
+                    send_from_directory(app.config["UPLOAD_FOLDER"], user.id+'.jpg'))
 
 @app.route('/me/reservations', methods=['GET'])
 def my_reservations():
