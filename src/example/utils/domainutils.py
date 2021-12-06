@@ -9,7 +9,8 @@ def doFinallyCatch(do, success, catch):
         res = do()
         if res is not None and res is False:
             return catch
-    except:
+    except Exception as e:
+        print(e) #Molto buono per debug
         return catch
     return success
 

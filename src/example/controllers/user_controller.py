@@ -55,6 +55,22 @@ def users_all():
         })
     return users
 
+def users_trainers_all():
+    db_users = database.get_all(Users)
+    users = []
+    for user in db_users:
+        if user.role == 'trainer':
+            users.append({
+                "name": user.name,
+                "surname": user.surname,
+                "role": user.role,
+                "email": user.email,
+                "birth_date": format_date(user.birth_date),
+                "fiscal_code": user.fiscal_code,
+                "id": user.id
+            })
+    return users
+
 def courses_all():
     db_courses = database.get_all(Courses)
     courses = []

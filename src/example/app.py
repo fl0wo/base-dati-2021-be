@@ -7,10 +7,10 @@ from .security import register_user, authenticate_user
 from .response import Response
 
 from .controllers.user_controller import \
-    parse_me, update_me, parse_my_res, users_all, courses_all
+    parse_me, update_me, parse_my_res, users_all, courses_all, users_trainers_all
 
 from .controllers.slot_controller import \
-    parse_slots, add_slot_reservation, add_slot, add_lesson
+    parse_slots, add_slot_reservation, add_slot, add_lesson, add_course
 
 from .controllers.lesson_controller import \
     parse_lessons
@@ -77,6 +77,11 @@ def all_users():
     return ifAdmin(lambda user:
                    sendResponse(users_all(), "", 200))
 
+@app.route('/users/trainers/all', methods=['GET'])
+def all_trainers():
+    return ifTrainer(lambda user:
+                   sendResponse(users_trainers_all(), "", 200))
+
 
 @app.route('/slots/reservations', methods=['GET'])
 def fetch_slots_reservations():
@@ -103,6 +108,15 @@ def add_lesson_route():
     return ifTrainer(lambda user:
                      doFinallyCatch(
                          lambda: add_lesson(request),
+                         sendResponse({}, "Added", 200),
+                         sendResponse({}, "Error", 503)
+                     ))
+
+@app.route('/courses/add', methods=['POST'])
+def add_course_route():
+    return ifTrainer(lambda user:
+                     doFinallyCatch(
+                         lambda: add_course(request),
                          sendResponse({}, "Added", 200),
                          sendResponse({}, "Error", 503)
                      ))

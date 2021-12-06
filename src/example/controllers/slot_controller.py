@@ -1,7 +1,8 @@
-from ..models import Users
+from ..models import Users, Lessons, Slots, Courses
 from .. import app, database
 from datetime import datetime
 from ..response import Response, DATE_FORMAT, DATE_FORMAT_IN, TIME_FORMAT
+import uuid
 
 from ..utils.dateutils import format_date, format_time
 
@@ -45,6 +46,16 @@ def add_lesson(request):
                           time=body['time'],
                           max_participants=body['max_participants'],  # TODO: check if > 1
                           course=body['course']
+                          )
+
+def add_course(request):
+    body = request.get_json()
+    # TODO: check that timefrom < timeto
+    database.add_instance(Courses,
+                          id=str(uuid.uuid4()),
+                          name=body['name'],
+                          description=body['description'],
+                          trainer=body['trainer']
                           )
 
 
