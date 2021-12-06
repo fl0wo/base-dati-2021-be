@@ -10,7 +10,7 @@ from .controllers.user_controller import \
     parse_me, update_me, parse_my_res, users_all, courses_all, users_trainers_all
 
 from .controllers.slot_controller import \
-    parse_slots, add_slot_reservation, add_slot, add_lesson, add_course
+    parse_slots, slot_add_reservation, add_slot, add_lesson, add_course
 
 from .controllers.lesson_controller import \
     parse_lessons
@@ -125,7 +125,7 @@ def add_course_route():
 def add_slot_reservation():
     return ifLogged(lambda user:
                     doFinallyCatch(
-                        lambda: add_slot_reservation(user, request),
+                        lambda: slot_add_reservation(user, request),
                         sendResponse({}, "Added", 200),
                         sendResponse({}, "Error", 503)
                     ))

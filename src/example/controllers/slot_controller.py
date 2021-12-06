@@ -1,4 +1,4 @@
-from ..models import Users, Lessons, Slots, Courses
+from ..models import Users, Lessons, Slots, Courses, Reservations, WeightRoomReservations
 from .. import app, database
 from datetime import datetime
 from ..response import Response, DATE_FORMAT, DATE_FORMAT_IN, TIME_FORMAT
@@ -59,14 +59,14 @@ def add_course(request):
                           )
 
 
-def add_slot_reservation(user, request):
+def slot_add_reservation(user, request):
     body = request.get_json()
     # database.begin_transaction() ---> sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Session.
     # TODO Cercare di capire come evitare sql injections, o facciamo dei controlli sul parametro oppure bisogna cambiare modo di fare le query
     db_is_space = database.check_if_space_for_slot_reservation(body['idSlot'])
     is_space = db_is_space[0]['there_is_space']  # TODO IVAN Controlla se sta roba funziona
     if is_space == 0:
-        return sendResponse({}, "Not enough space in slot", 401)
+        return None
 
     reservation_id = str(uuid.uuid4())
     database.add_instance_no_commit(Reservations,

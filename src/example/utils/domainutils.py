@@ -32,7 +32,7 @@ def ifAdmin(f):
     return ifHasRole(f, ADMIN)
 
 def ifManager(f):
-    return ifHasRole(f, MANAGER)
+    return ifHasRole(f, MANAGER) or ifAdmin(f)
 
 def ifTrainer(f):
-    return ifHasRole(f, TRAINER)
+    return ifHasRole(f, TRAINER) or ifAdmin(f)
