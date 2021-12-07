@@ -1,6 +1,6 @@
-from flask import jsonify, request
+from flask import jsonify, request,make_response
 from flask_cors import CORS
-from . import app , UPLOAD_FOLDER, ALLOWED_EXTENSIONS
+from . import app, UPLOAD_FOLDER, ALLOWED_EXTENSIONS
 
 from .security import register_user, authenticate_user
 
@@ -20,6 +20,8 @@ from .utils.domainutils import doFinallyCatch, \
 
 from .utils.fileuploaderutils import upload_file, download_profilepic
 
+from flask_restx import Api, Resource, fields
+
 CORS(app)
 
 basicHeaders = [
@@ -29,42 +31,59 @@ basicHeaders = [
     ('Access-Control-Allow-Methods', 'POST'),
 ]
 
+api = Api(app, version='1.0',
+          title='Gym API',
+          description='Gym BackEnd Api',
+          )
+
+todo = api.model('Todo', {
+    'id': fields.Integer(readonly=True, description='The task unique identifier'),
+    'task': fields.String(required=True, description='The task details')
+})
+
+
 def sendResponse(payload, msg, status):
     r = Response()
     r.data = payload
     r.message = msg
     r.status = status
-    return jsonify(r.toJSON()), 200, basicHeaders
+    return make_response(jsonify(r.toJSON()), 200,basicHeaders)
 
 
-@app.route('/me', methods=['GET'])
-def me():
-    return ifLogged(lambda user:
-                    sendResponse(parse_me(user), "", 200))
+@api.route('/me')
+@api.param('x-access-token', 'A valid JWT token')
+class Me(Resource):
+    @api.doc(id='getMe')
+    @api.response(200, 'Success', headers={'X-Header': 'Some header'})
+    def get(self):
+        return ifLogged(lambda user:
+                        sendResponse(parse_me(user), "", 200))
+
+    @api.doc(id='updateMe')
+    def post(self):
+        return ifLogged(lambda user:
+                        doFinallyCatch(
+                            lambda: update_me(user, request),
+                            sendResponse({}, "Updated", 200),
+                            sendResponse({}, "Error", 400)
+                        ))
 
 
-@app.route('/me', methods=['POST'])
-def me_update():
-    return ifLogged(lambda user:
-                    doFinallyCatch(
-                        lambda: update_me(user, request),
-                        sendResponse({}, "Updated", 200),
-                        sendResponse({}, "Error", 400)
-                    ))
+@api.route('/me/profilepic')
+@api.doc(id='getMyProfilePic')
+class Picture(Resource):
+    def get(self):
+        return ifLogged(lambda user:
+                        download_profilepic(user.id))
 
-@app.route('/me/profilepic', methods=['POST'])
-def me_profilepic():
-    return ifLogged(lambda user:
-                    doFinallyCatch(
-                        lambda: upload_file(user.id),
-                        sendResponse({}, "Uploaded", 200),
-                        sendResponse({}, "Error", 400)
-                    ))
+    def post(self):
+        return ifLogged(lambda user:
+                        doFinallyCatch(
+                            lambda: upload_file(user.id),
+                            sendResponse({}, "Uploaded", 200),
+                            sendResponse({}, "Error", 400)
+                        ))
 
-@app.route('/me/profilepic',methods=['GET'])
-def download_file():
-    return ifLogged(lambda user:
-                    download_profilepic(user.id))
 
 @app.route('/me/reservations', methods=['GET'])
 def my_reservations():
@@ -77,10 +96,11 @@ def all_users():
     return ifAdmin(lambda user:
                    sendResponse(users_all(), "", 200))
 
+
 @app.route('/users/trainers/all', methods=['GET'])
 def all_trainers():
     return ifTrainer(lambda user:
-                   sendResponse(users_trainers_all(), "", 200))
+                     sendResponse(users_trainers_all(), "", 200))
 
 
 @app.route('/slots/reservations', methods=['GET'])
@@ -103,6 +123,7 @@ def add_slot_route():
                          sendResponse({}, "Error", 503)
                      ))
 
+
 @app.route('/lessons/add', methods=['POST'])
 def add_lesson_route():
     return ifTrainer(lambda user:
@@ -111,6 +132,7 @@ def add_lesson_route():
                          sendResponse({}, "Added", 200),
                          sendResponse({}, "Error", 503)
                      ))
+
 
 @app.route('/courses/add', methods=['POST'])
 def add_course_route():
@@ -121,6 +143,7 @@ def add_course_route():
                          sendResponse({}, "Error", 503)
                      ))
 
+
 @app.route('/slots/reservation', methods=['POST'])
 def add_slot_reservation():
     return ifLogged(lambda user:
@@ -130,10 +153,12 @@ def add_slot_reservation():
                         sendResponse({}, "Error", 503)
                     ))
 
+
 @app.route('/courses/all', methods=['GET'])
 def fetch_all_courses():
     return ifTrainer(lambda user:
-                   sendResponse(courses_all(), "", 200))
+                     sendResponse(courses_all(), "", 200))
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def signup_user():
