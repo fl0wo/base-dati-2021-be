@@ -8,8 +8,6 @@ DECLARE
         SELECT * INTO trainer_row
         FROM "gym".users u
         WHERE u.id=NEW.trainer;
-        -- TODO: use this method
-        -- return safeReturn(trainer_row.role=='trainer',NEW);
 
         IF trainer_row.role == 'trainer' THEN
             RETURN NEW;
@@ -45,9 +43,8 @@ DECLARE
         WHERE wr.slot = NEW.slot;
 
         IF current_occupation>=slot_row.max_capacity THEN
-    --   TODO: use rollback instead
-    --    DELETE FROM "gym".reservations r
-    --    WHERE r.id = NEW.reservation_id;
+        DELETE FROM "gym".reservations r
+        WHERE r.id = NEW.reservation_id;
             RETURN NULL;
         ELSE
             RETURN NEW;
@@ -78,8 +75,8 @@ DECLARE
         WHERE lr.lesson = NEW.lesson;
 
         IF current_occupation+1>lesson_row.max_participants THEN
-        -- TODO: use roolback    DELETE FROM "gym".reservations r
-        --    WHERE r.id = NEW.reservation_id;
+            DELETE FROM "gym".reservations r
+            WHERE r.id = NEW.reservation_id;
             RETURN NULL;
         ELSE
             RETURN NEW;
@@ -95,60 +92,28 @@ EXECUTE FUNCTION "gym".is_lesson_full_fun();
 
 
 
--- Controlla che l'utente abbia iscrizione valida e abbia abbastanza soldi per compare prodotto //IVAN
-CREATE OR REPLACE FUNCTION "gym".check_transaction()
-RETURNS trigger AS $$
-
-DECLARE
-    product "gym".products%ROWTYPE=NULL;
-    subscription "gym".subscriptions%ROWTYPE=NULL;
-
-BEGIN
-    SELECT * INTO product
-    FROM "gym".products p
-    WHERE p.id = NEW.product;
-
-    SELECT * INTO subscription
-    FROM "gym".subscriptions s
-    WHERE s.id = NEW.subscription;
-
-    IF subscription.end_date > current_date AND product.price <= subscription.cur_balance THEN
-        RETURN NEW;
-    ELSE
-        RETURN NULL;
-    END IF;
-END;
-$$ LANGUAGE plpgsql;
-
-DROP TRIGGER IF EXISTS check_transaction ON "gym".transactions;
-CREATE TRIGGER check_transaction
-BEFORE INSERT OR UPDATE ON "gym".transactions
-FOR EACH ROW
-EXECUTE FUNCTION "gym".check_transaction();
-
-
--- Controlla che l'iscrizione non sia fatta da Admin o Istrtuttori //IVAN
+-- Controlla che l'abbonamento sia valido quando si fa un accesso
 CREATE OR REPLACE FUNCTION "gym".check_subscription()
 RETURNS trigger AS $$
 
 DECLARE
-    client "gym".users%ROWTYPE=NULL;
+    subscription "gym".subscriptions%ROWTYPE=NULL;
 
 BEGIN
-    SELECT * INTO client
-    FROM "gym".users u
-    WHERE u.id = NEW.user;
+    SELECT * INTO subscription
+    FROM "gym".subscription s
+    WHERE s.user = NEW.user;
 
-    IF client.role <> 'customer' THEN
-        RETURN NULL;
-    ELSE
+    IF subscription.start_date < NOW() AND subscription.end_date > NOW() THEN
         RETURN NEW;
+    ELSE
+        RETURN NULL;
     END IF;
 END
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS check_subscription ON "gym".subscriptions;
+DROP TRIGGER IF EXISTS check_subscription ON "gym".accesses;
 CREATE TRIGGER check_subscription
-BEFORE INSERT OR UPDATE ON "gym".subscriptions
+BEFORE INSERT OR UPDATE ON "gym".accesses
 FOR EACH ROW
 EXECUTE FUNCTION "gym".check_subscription();

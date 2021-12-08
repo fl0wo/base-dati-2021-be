@@ -2,8 +2,9 @@ import flask_sqlalchemy
 import sqlalchemy
 from sqlalchemy import (Column, Integer, String, Numeric, CheckConstraint, UniqueConstraint, Date)
 from sqlalchemy.sql import func
-from .lowdb import define_schema, populate_example#, define_trigger, define_roles
+from .lowdb import define_schema, populate_example, define_trigger, define_roles
 from . import app
+from datetime import datetime, timedelta
 
 define_schema("gym")
 db = flask_sqlalchemy.SQLAlchemy(app)
@@ -35,9 +36,9 @@ class Subscriptions(db.Model):
     )
 
     id = db.Column("id", ID_TYPE, primary_key=True)
-    start_date = db.Column("start_date", db.Date, nullable=False)
-    end_date = db.Column("end_date", db.Date, nullable=False)
-    cur_balance = db.Column("cur_balance", db.Numeric(15, 2), CheckConstraint("cur_balance > 0"),  nullable=False)
+    start_date = db.Column("start_date", db.Date, nullable=False, default=func.now() )
+    end_date = db.Column("end_date", db.Date, nullable=False, default=datetime.now() + timedelta(days=365))
+    cur_balance = db.Column("cur_balance", db.Numeric(15, 2), CheckConstraint("cur_balance >= 0"),  nullable=False)
     user = db.Column(ID_TYPE, db.ForeignKey(Users.id), nullable=False)
 
 
@@ -50,15 +51,15 @@ class Subscriptions(db.Model):
 #    price = db.Column("price", db.Numeric(15, 2), CheckConstraint("price > 0"))
 
 
-class Transactions(db.Model):
-    __table_name__ = "Transactions"
-    __table_args__ = {"schema": "gym"}
-
-    id = db.Column("id", ID_TYPE, primary_key=True)
-    date = db.Column("date", db.Date)
-    time = db.Column("time", db.Time)
-    description = db.Column("description", db.String(50))
-    subscription = db.Column("subscription", ID_TYPE, db.ForeignKey(Subscriptions.id), nullable=False)
+#class Transactions(db.Model):
+#    __table_name__ = "Transactions"
+#    __table_args__ = {"schema": "gym"}
+#
+#    id = db.Column("id", ID_TYPE, primary_key=True)
+#    date = db.Column("date", db.Date)
+#    time = db.Column("time", db.Time)
+#    description = db.Column("description", db.String(50))
+#    subscription = db.Column("subscription", ID_TYPE, db.ForeignKey(Subscriptions.id), nullable=False)
 
 
 class Policies(db.Model):
@@ -69,7 +70,7 @@ class Policies(db.Model):
     )
 
     id = db.Column("id", ID_TYPE, primary_key=True)
-    description = db.Column("description", db.String(50))
+    description = db.Column("description", db.String(1000))
     valid_from = db.Column("valid_from", db.Date)
     valid_to = db.Column("valid_to", db.Date)
 
@@ -106,7 +107,7 @@ class Reservations(db.Model):
     )
 
     id = db.Column("id", ID_TYPE, primary_key=True)
-    date = db.Column("date", db.Date, default=func.now())#TODO capire se bisogna eliminare lo schema a db e riinizializzarlo con flask perche non funziona now()
+    date = db.Column("date", db.Date, default=func.now())
     time = db.Column("time", db.Time, default=func.now())
     customer = db.Column("customer", ID_TYPE, db.ForeignKey(Users.id), nullable=False)
 
@@ -146,7 +147,6 @@ class WeightRoomReservations(db.Model):
     __table_name__ = "WeightRoomReservations"
     __table_args__ = (UniqueConstraint("slot", "reservation_id"), {"schema": "gym"})
 
-    reservation_number = db.Column("reservation_number", db.Integer, primary_key=True)
     reservation_id = db.Column("reservation_id", ID_TYPE, db.ForeignKey(Reservations.id),
                                primary_key=True, nullable=False)
     slot = db.Column("slot", ID_TYPE, db.ForeignKey(Slots.id), nullable=False)
@@ -156,7 +156,6 @@ class LessonReservation(db.Model):
     __table_name__ = "LessonReservation"
     __table_args__ = (UniqueConstraint("lesson", "reservation_id"), {"schema": "gym"})
 
-    participant_number = db.Column("participant_number", db.Integer, primary_key=True)
     reservation_id = db.Column("reservation_id", ID_TYPE, db.ForeignKey(Reservations.id),
                                primary_key=True, nullable=False)
     lesson = db.Column("lesson", ID_TYPE, db.ForeignKey(Lessons.id), nullable=False)
@@ -166,6 +165,6 @@ db.create_all()
 
 populate_example()
 
-#define_trigger()
-#define_roles()
+define_trigger()
+define_roles()
 

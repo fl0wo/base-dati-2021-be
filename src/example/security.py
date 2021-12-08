@@ -7,7 +7,7 @@ from functools import wraps
 
 from . import config, database, app
 from .database import get_by_id
-from .models import Users
+from .models import Users, Subscriptions
 
 ADMIN = "admin"
 MANAGER = "manager"
@@ -98,13 +98,19 @@ def manager_required(func):
 
 def register_user(data):
     hashed_password = generate_password_hash(data['password'], method='sha256')
+    id_user = str(uuid.uuid4())
     database.add_instance(Users,
-                          id=str(uuid.uuid4()),
+                          id=id_user,
                           email=data['email'],
                           password=hashed_password,
                           name=data['name'],
                           surname=data['surname'],
                           role=CUSTOMER)
+
+    database.add_instance(Subscriptions,
+                          id=str(uuid.uuid4()),
+                          cur_balance=0,
+                          user=id_user)
 
 
 def authenticate_user(request):

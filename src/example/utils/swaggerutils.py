@@ -21,7 +21,8 @@ user_api = api.model('User', {
     'role': fields.String(required=True, description='The role assigned to user'),
     'email': fields.String(required=True, description='The user email'),
     'birth_date': fields.Date(required=True, description='The date user born'),
-    'fiscal_code': fields.String(required=True, description='The user fiscal id')
+    'fiscal_code': fields.String(required=True, description='The user fiscal id'),
+    'id': fields.String(readonly=True, description='The user id')
 })
 
 update_user_api = api.model('UpdateUser', {

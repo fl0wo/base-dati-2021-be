@@ -1,6 +1,8 @@
-from .models import db
+from .models import db, Accesses, Policies
 import sqlalchemy
 from .lowdb import perform_query_txt
+from sqlalchemy import bindparam, String
+from datetime import datetime, timedelta
 
 
 def get_all(model):
@@ -65,23 +67,25 @@ def get_all_slots_curent_reservation():
     return result_as_list
 
 
-def check_if_space_for_slot_reservation(slotId):#TODO:fix sql injection
-    sql_query = sqlalchemy.text("select * from gym.thereIsSpaceInSlotView WHERE id='"+slotId+"'")
+def check_if_space_for_slot_reservation(slotId):
+    sql_query = sqlalchemy.text("select * from gym.there_Is_Space_In_Slot_View WHERE id=:slotId")
+    sql_query = sql_query.bindparams(bindparam('slotId', value=slotId, type_=String))
     result = perform_query_txt(sql_query)
     result_as_list = result.fetchall()
     return result_as_list
 
 
-def check_if_space_for_lesson_reservation(lessonId):#TODO:fix sql injection
-    sql_query = sqlalchemy.text("select * from gym.thereIsSpaceInLessonView WHERE id='"+lessonId+"'")
+def check_if_space_for_lesson_reservation(lessonId):
+    sql_query = sqlalchemy.text("select * from gym.there_Is_Space_In_Lesson_View WHERE id=:lessonId")
+    sql_query = sql_query.bindparams(bindparam('lessonId', value=lessonId, type_=String))
     result = perform_query_txt(sql_query)
     result_as_list = result.fetchall()
     return result_as_list
 
 
-def get_reservations_of(userId):#TODO:fix sql injection
-    sql_query = sqlalchemy.text("select * from gym.userWithAllReservations where customer='"+userId+"'")
-#"SELECT 'lesson' as reservation_type,r.id,r.date,r.time,r.customer,r.room,l.participant_number,l.reservation_id,l.lesson as slot FROM gym.reservations r RIGHT JOIN gym.lesson_reservation l on r.id = l.reservation_id WHERE r.customer='"+ userId + "' UNION ALL SELECT 'weightroom' as reservation_type,* FROM gym.reservations r RIGHT JOIN gym.weight_room_reservations on r.id = weight_room_reservations.reservation_id WHERE r.customer='"+userId +"'")
+def get_reservations_of(userId):
+    sql_query = sqlalchemy.text("select * from gym.user_With_All_Reservations where customer=:userId")
+    sql_query = sql_query.bindparams(bindparam('userId', value=userId, type_=String))
     result = perform_query_txt(sql_query)
     result_as_list = result.fetchall()
     return result_as_list
@@ -91,3 +95,12 @@ def get_all_lessons_curent_reservation():
     result = perform_query_txt(sql_query)
     result_as_list = result.fetchall()
     return result_as_list
+
+def get_all_accesses(userId):
+    data = Accesses.query.filter_by(user=userId).all()
+    return data;
+
+def get_current_policy():
+    todays_datetime = datetime(datetime.today().year, datetime.today().month, datetime.today().day)
+    data = Policies.query.filter(todays_datetime < Policies.valid_to).all()
+    return data

@@ -1,8 +1,8 @@
-from ..models import Users, Courses
+from ..models import Users, Courses, Policies, Accesses
 from .. import app, database
 from datetime import datetime
 from ..response import Response, DATE_FORMAT, DATE_FORMAT_IN, TIME_FORMAT
-from ..utils.dateutils import format_date
+from ..utils.dateutils import format_date, format_time
 
 
 def parse_me(user: Users):
@@ -13,7 +13,8 @@ def parse_me(user: Users):
         "email": user.email,
         "birth_date": user.birth_date,
         "fiscal_code": user.fiscal_code,
-        "phone": user.phone
+        "phone": user.phone,
+        "id": user.id
     }
 
 
@@ -37,7 +38,6 @@ def parse_my_res(user):
             "reservation_type": sub.reservation_type,
             "date": sub.date.strftime(DATE_FORMAT),
             "time": sub.time.strftime(TIME_FORMAT),
-            "participant_number": sub.participant_number,
             "slot": sub.slot
         })
     return subscription_data
@@ -85,3 +85,28 @@ def courses_all():
             "trainer": course.trainer
         })
     return courses
+
+def current_policy():
+    db_policies = database.get_current_policy()
+    policies = []
+    for policy in db_policies:
+        policies.append({
+            "id": policy.id,
+            "description": policy.description,
+            "valid_from": format_date(policy.valid_from),
+            "valid_to":format_date(policy.valid_to)
+        })
+    return policies
+
+
+def accesses_all(user):
+    db_accesses = database.get_all_accesses(user.id)
+    accesses = []
+    for access in db_accesses:
+        accesses.append({
+            "id": access.id,
+            "date": format_date(access.date),
+            "time_entrance": format_time(access.time_entrance),
+            "time_exit": format_time(access.time_exit)
+        })
+    return accesses

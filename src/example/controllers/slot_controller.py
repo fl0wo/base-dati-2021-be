@@ -73,7 +73,6 @@ def slot_add_reservation(user, request):
                                     customer=body['idUser'])
     database.flush()
     database.add_instance_no_commit(WeightRoomReservations,
-                                    reservation_number=999,
                                     reservation_id=reservation_id,
                                     slot=(body['idSlot']))
     database.commit_changes()
@@ -95,7 +94,6 @@ def lesson_add_reservation(user, request):
                                     customer=body['idUser'])
     database.flush()
     database.add_instance_no_commit(LessonReservation,
-                                    participant_number=999,
                                     reservation_id=reservation_id,
                                     lesson=(body['idLesson']))
 

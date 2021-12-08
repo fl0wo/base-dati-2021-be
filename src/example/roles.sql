@@ -1,3 +1,8 @@
+DROP USER customer;
+DROP USER trainer;
+DROP USER machine;
+DROP USER manager;
+
 CREATE USER  customer WITH password 'customer';
 CREATE USER trainer WITH password 'trainer';
 CREATE USER machine WITH password 'machine';
@@ -61,8 +66,8 @@ GRANT UPDATE, SELECT ON TABLE "gym".subscriptions TO trainer;
 GRANT DELETE, INSERT, UPDATE, SELECT ON TABLE "gym".subscriptions TO manager;
 
 --Transactions
-GRANT SELECT ON TABLE "gym".transactions TO customer;
-GRANT SELECT ON TABLE "gym".transactions TO trainer;
-GRANT INSERT ON TABLE "gym".transactions TO machine;
-GRANT DELETE, INSERT, UPDATE, SELECT ON TABLE "gym".transactions TO manager;
+--GRANT SELECT ON TABLE "gym".transactions TO customer;
+--GRANT SELECT ON TABLE "gym".transactions TO trainer;
+--GRANT INSERT ON TABLE "gym".transactions TO machine;
+--GRANT DELETE, INSERT, UPDATE, SELECT ON TABLE "gym".transactions TO manager;
 

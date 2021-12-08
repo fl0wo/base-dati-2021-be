@@ -3,8 +3,8 @@ CREATE VIEW gym.slots_with_current_reservation_V AS
     SELECT s.*, count(w.*) as current_reservations FROM gym.slots s left join gym.weight_room_reservations w on s.id = w.slot
     group by id, date, time_from, time_to, max_capacity;
 
-DROP VIEW IF EXISTS gym.thereIsSpaceInSlotView;
-CREATE VIEW gym.thereIsSpaceInSlotView AS
+DROP VIEW IF EXISTS gym.there_Is_Space_In_Slot_View;
+CREATE VIEW gym.there_Is_Space_In_Slot_View AS
 SELECT slotReservations.id FROM gym.slots_with_current_reservation_V as slotReservations
 where max_capacity>current_reservations;
 
@@ -16,14 +16,14 @@ FROM gym.lessons l
     inner join gym.courses c on c.id = l.course
 group by l.id, date, time, max_participants, c.name, c.description;
 
-DROP VIEW IF EXISTS gym.thereIsSpaceInLessonView;
-CREATE VIEW gym.thereIsSpaceInLessonView AS
+DROP VIEW IF EXISTS gym.there_Is_Space_In_Lesson_View;
+CREATE VIEW gym.there_Is_Space_In_Lesson_View AS
 SELECT  lessonReservations.id FROM gym.lessons_with_current_reservation_V as lessonReservations
 where max_participants>current_reservations;
 
-DROP VIEW IF EXISTS gym.userWithAllReservations;
-CREATE VIEW gym.userWithAllReservations AS
-SELECT 'lesson' as reservation_type,r.id,r.date,r.time,r.customer,l.participant_number,l.reservation_id,l.lesson as slot
+DROP VIEW IF EXISTS gym.user_With_All_Reservations;
+CREATE VIEW gym.user_With_All_Reservations AS
+SELECT 'lesson' as reservation_type,r.id,r.date,r.time,r.customer,l.reservation_id,l.lesson as slot
 FROM gym.reservations r
     RIGHT JOIN gym.lesson_reservation l on r.id = l.reservation_id
 UNION ALL
@@ -57,9 +57,9 @@ INSERT INTO gym.lessons VALUES (gen_random_uuid(), '2021-12-19', '12:00:00', 20,
 
 
 INSERT INTO gym.subscriptions VALUES ('abbonamentoDiIvan', '2021-11-19', '2022-11-19', 2000.15, 'ivanID');
-INSERT INTO gym.transactions VALUES (gen_random_uuid(), '2021-12-28', '16:00:00', 'acqua', 'abbonamentoDiIvan');
-INSERT INTO gym.transactions VALUES (gen_random_uuid(), '2021-12-28', '17:00:00', 'felpa', 'abbonamentoDiIvan');
-INSERT INTO gym.transactions VALUES (gen_random_uuid(), '2021-12-22', '19:00:00', 'proteine', 'abbonamentoDiIvan');
+--INSERT INTO gym.transactions VALUES (gen_random_uuid(), '2021-12-28', '16:00:00', 'acqua', 'abbonamentoDiIvan');
+--INSERT INTO gym.transactions VALUES (gen_random_uuid(), '2021-12-28', '17:00:00', 'felpa', 'abbonamentoDiIvan');
+--INSERT INTO gym.transactions VALUES (gen_random_uuid(), '2021-12-22', '19:00:00', 'proteine', 'abbonamentoDiIvan');
 
 
 INSERT INTO gym.accesses VALUES (gen_random_uuid(), '2021-12-22', '19:00:00', '20:00:00', 'ivanID');
@@ -74,3 +74,9 @@ INSERT INTO gym.accesses VALUES (gen_random_uuid(), '2021-12-11', '19:00:00', '2
 INSERT INTO gym.accesses VALUES (gen_random_uuid(), '2021-12-12', '19:00:00', '21:00:00', 'floID');
 INSERT INTO gym.accesses VALUES (gen_random_uuid(), '2021-12-11', '19:00:00', '22:00:00', 'xiloID');
 INSERT INTO gym.accesses VALUES (gen_random_uuid(), '2021-12-12', '19:00:00', '21:00:00', 'xiloID');
+--adminID
+INSERT INTO gym.accesses VALUES (gen_random_uuid(), '2021-12-10', '19:00:00', '21:00:00', 'adminID');
+INSERT INTO gym.accesses VALUES (gen_random_uuid(), '2021-12-11', '19:00:00', '22:00:00', 'adminID');
+INSERT INTO gym.accesses VALUES (gen_random_uuid(), '2021-12-12', '19:00:00', '21:00:00', 'adminID');
+
+INSERT INTO gym.policies VALUES ('policyId', 'Any member who incurs an injury or becomes dizzy/ill while using the centers should immediately contact a Fitness Center staff person for assistance. A first aid kit is kept at the front desk for minor injuries. In cases requiring more extensive first aid, fitness center staff will contact the appropriate persons for assistance. It is important that fitness center staff be notified of any cases of injury or illness so that proper procedures can be initiated. Athletic tape may only be used for minor injuries.', NOW(), '2023-12-25');

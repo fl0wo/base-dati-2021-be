@@ -7,7 +7,7 @@ from .security import register_user, authenticate_user
 from .response import Response
 
 from .controllers.user_controller import \
-    parse_me, update_me, parse_my_res, users_all, courses_all, users_trainers_all
+    parse_me, update_me, parse_my_res, users_all, courses_all, users_trainers_all, current_policy, accesses_all
 
 from .controllers.slot_controller import \
     parse_slots, slot_add_reservation, add_slot, add_lesson, add_course, lesson_add_reservation
@@ -160,7 +160,7 @@ class LessonsReservation(Resource):
 @api.route('/courses')
 class Courses(Resource):
     def get(self):
-        return ifTrainer(lambda user:
+        return always(lambda:
                          sendResponseJson(courses_all(), "", 200))
 
     def post(self):
@@ -170,6 +170,19 @@ class Courses(Resource):
                              sendResponseJson({}, "Added", 200),
                              sendResponseJson({}, "Error", 503)
                          ))
+
+
+@api.route('/policies')
+class Policies(Resource):
+    def get(self):
+        return always(lambda:
+                         sendResponseJson(current_policy(), "", 200))
+
+@api.route('/accesses')
+class Accesses(Resource):
+    def get(self):
+        return ifLogged(lambda user:
+                        sendResponseJson(accesses_all(user), "", 200))
 
 
 @api.route('/register', methods=['GET', 'POST'])
