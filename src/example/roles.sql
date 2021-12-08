@@ -1,9 +1,9 @@
-DROP USER customer;
-DROP USER trainer;
-DROP USER machine;
-DROP USER manager;
+DROP USER IF EXISTS customer;
+DROP USER IF EXISTS trainer;
+DROP USER IF EXISTS machine;
+DROP USER IF EXISTS manager;
 
-CREATE USER  customer WITH password 'customer';
+CREATE USER customer WITH password 'customer';
 CREATE USER trainer WITH password 'trainer';
 CREATE USER machine WITH password 'machine';
 CREATE USER manager WITH password 'manager';

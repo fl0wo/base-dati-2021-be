@@ -13,14 +13,11 @@ ID_TYPE = db.String(36)
 
 class Users(db.Model):
     __tablename__ = "users"
-
     __table_args__ = (UniqueConstraint("email"), {"schema": "gym"})
-
     id = db.Column("id", ID_TYPE, primary_key=True)  # siamo gia dentro user sappiamo che id e' id_user. ^-^
     name = db.Column("name", db.String(50), nullable=True)
     surname = db.Column("surname", db.String(50), nullable=True)
     birth_date = db.Column("birth_date", db.Date, nullable=True)
-    #  fiscal code
     fiscal_code = db.Column("fiscal_code", db.String(50), nullable=True)
     phone = db.Column("phone", db.String(50), nullable=True)
     role = db.Column("role", db.String(50), nullable=True)
