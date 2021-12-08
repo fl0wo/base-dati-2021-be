@@ -57,20 +57,27 @@ def get_all_slots_curent_reservation():
     return result_as_list
 
 
-def check_if_space_for_slot_reservation(slotId):
+def check_if_space_for_slot_reservation(slotId):#TODO:Fare/usare vista pre esistente
     sql_query = sqlalchemy.text("SELECT 1 as there_is_space FROM(SELECT s.*, count(w.*) as current_reservations FROM gym.slots s left join gym.weight_room_reservations w on s.id = w.slot where s.id = '"+slotId+"' group by id, date, time_from, time_to, max_capacity) as slotReservations where max_capacity>current_reservations UNION  ALL SELECT 0 LIMIT  1;")
     result = perform_query_txt(sql_query)
     result_as_list = result.fetchall()
     return result_as_list
 
 
-def get_reservations_of(userId):
+def check_if_space_for_lesson_reservation(slotId):#TODO:Fare/usare vista pre esistente
+    sql_query = sqlalchemy.text("SELECT 1 as there_is_space FROM(SELECT s.*, count(w.*) as current_reservations FROM gym.slots s left join gym.weight_room_reservations w on s.id = w.slot where s.id = '"+slotId+"' group by id, date, time_from, time_to, max_capacity) as slotReservations where max_capacity>current_reservations UNION  ALL SELECT 0 LIMIT  1;")
+    result = perform_query_txt(sql_query)
+    result_as_list = result.fetchall()
+    return result_as_list
+
+
+def get_reservations_of(userId):#TODO: bisogna fare vista per sta roba e fare il select where sulla vista
     sql_query = sqlalchemy.text("SELECT 'lesson' as reservation_type,r.id,r.date,r.time,r.customer,r.room,l.participant_number,l.reservation_id,l.lesson as slot FROM gym.reservations r RIGHT JOIN gym.lesson_reservation l on r.id = l.reservation_id WHERE r.customer='"+ userId + "' UNION ALL SELECT 'weightroom' as reservation_type,* FROM gym.reservations r RIGHT JOIN gym.weight_room_reservations on r.id = weight_room_reservations.reservation_id WHERE r.customer='"+userId +"'")
     result = perform_query_txt(sql_query)
     result_as_list = result.fetchall()
     return result_as_list
 
-def get_all_lessons_curent_reservation():
+def get_all_lessons_curent_reservation():#TODO: bisogna fare vista per sta roba
     sql_query = sqlalchemy.text("SELECT l.id, l.date, l.time, l.max_participants, count(lr.*) as current_reservations, c.name as course, c.description as course_description FROM gym.lessons l left join gym.lesson_reservation lr on l.id = lr.lesson inner join gym.courses c on c.id = l.course group by l.id, date, time, max_participants, c.name, c.description;")
     result = perform_query_txt(sql_query)
     result_as_list = result.fetchall()

@@ -1,4 +1,4 @@
-from ..models import Users, Lessons, Slots, Courses, Reservations, WeightRoomReservations
+from ..models import Users, Lessons, Slots, Courses, Reservations, WeightRoomReservations, LessonReservation
 from .. import app, database
 from datetime import datetime
 from ..response import Response, DATE_FORMAT, DATE_FORMAT_IN, TIME_FORMAT
@@ -78,4 +78,27 @@ def slot_add_reservation(user, request):
                                     # FIXME TODO: MANDARGLI DA FRONT END/ fare query qui x prendersi il progressivo della reservation x quel determinato slot oppure eliminare il campo perche non viene mai usato
                                     reservation_id=reservation_id,
                                     slot=(body['idSlot']))
+    database.commit_changes()
+
+
+
+def lesson_add_reservation(user, request):
+    body = request.get_json()
+    # database.begin_transaction() ---> sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Session.
+    # TODO Cercare di capire come evitare sql injections, o facciamo dei controlli sul parametro oppure bisogna cambiare modo di fare le query
+    db_is_space = database.check_if_space_for_lesson_reservation(body['idSlot'])
+    is_space = db_is_space[0]['there_is_space']  # TODO IVAN Controlla se sta roba funziona
+    if is_space == 0:
+        return None
+
+    reservation_id = str(uuid.uuid4())
+    database.add_instance_no_commit(Reservations,
+                                    id=reservation_id,
+                                    customer=user.id,
+                                    room='1')
+    database.add_instance_no_commit(LessonReservation,
+                                    participant_number=999,
+                                    # FIXME TODO: MANDARGLI DA FRONT END/ fare query qui x prendersi il progressivo della reservation x quel determinato slot oppure eliminare il campo perche non viene mai usato
+                                    reservation_id=reservation_id,
+                                    lesson=(body['idLesson']))
     database.commit_changes()
