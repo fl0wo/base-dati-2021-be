@@ -3,6 +3,33 @@ CREATE VIEW gym.slots_with_current_reservation_V AS
     SELECT s.*, count(w.*) as current_reservations FROM gym.slots s left join gym.weight_room_reservations w on s.id = w.slot
     group by id, date, time_from, time_to, max_capacity;
 
+DROP VIEW IF EXISTS gym.thereIsSpaceInSlotView;
+CREATE VIEW gym.thereIsSpaceInSlotView AS
+SELECT slotReservations.id FROM gym.slots_with_current_reservation_V as slotReservations
+where max_capacity>current_reservations;
+
+DROP VIEW IF EXISTS gym.lessons_with_current_reservation_V;
+CREATE VIEW gym.lessons_with_current_reservation_V AS
+SELECT l.id, l.date, l.time, l.max_participants, count(lr.*) as current_reservations, c.name as course, c.description as course_description
+FROM gym.lessons l
+    left join gym.lesson_reservation lr on l.id = lr.lesson
+    inner join gym.courses c on c.id = l.course
+group by l.id, date, time, max_participants, c.name, c.description;
+
+DROP VIEW IF EXISTS gym.thereIsSpaceInLessonView;
+CREATE VIEW gym.thereIsSpaceInLessonView AS
+SELECT  lessonReservations.id FROM gym.lessons_with_current_reservation_V as lessonReservations
+where max_participants>current_reservations;
+
+DROP VIEW IF EXISTS gym.userWithAllReservations;
+CREATE VIEW gym.userWithAllReservations AS
+SELECT 'lesson' as reservation_type,r.id,r.date,r.time,r.customer,l.participant_number,l.reservation_id,l.lesson as slot
+FROM gym.reservations r
+    RIGHT JOIN gym.lesson_reservation l on r.id = l.reservation_id
+UNION ALL
+SELECT 'weightroom' as reservation_type,* FROM gym.reservations r
+    RIGHT JOIN gym.weight_room_reservations on r.id = weight_room_reservations.reservation_id;
+
 INSERT INTO gym.slots values (gen_random_uuid(),'2021-12-25', '08:00:00', '12:00:00', 60, 'Titolo Slot', 'Descrizione slot');
 INSERT INTO gym.slots values (gen_random_uuid(),'2021-12-25', '12:00:00', '16:00:00', 80, 'Titolo Slot', 'Descrizione slot');
 INSERT INTO gym.slots values (gen_random_uuid(),'2021-12-25', '16:00:00', '20:00:00', 90, 'Titolo Slot', 'Descrizione slot');
@@ -18,9 +45,6 @@ INSERT INTO gym.users (id, name, surname, birth_date, fiscal_code, phone, role, 
 INSERT INTO gym.users (id, name, surname, birth_date, fiscal_code, phone, role, email, password) VALUES ('floID', 'flo', 'flo', null, null, null, 'manager', 'manager', :PWD);
 INSERT INTO gym.users (id, name, surname, birth_date, fiscal_code, phone, role, email, password) VALUES ('adminID', 'admin', 'admin', null, null, null, 'admin', 'admin', :PWD);
 
-INSERT INTO gym.rooms values ('1', 'weight_room');
-INSERT INTO gym.rooms values ('2', 'cyber_robics');
-INSERT INTO gym.rooms values ('3', 'cross_fit');
 
 INSERT INTO gym.courses VALUES ('CyberRobicsCourseID', 'CyberRobics', 'You also have to be lifting heavy weights', 'xiloID');
 INSERT INTO gym.courses VALUES ('CrossFitCourseID', 'CrossFit', 'You also have to do crossift', 'xiloID');

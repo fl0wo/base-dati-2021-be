@@ -98,18 +98,10 @@ class Accesses(db.Model):
     user = db.Column("user", ID_TYPE, db.ForeignKey(Users.id), nullable=False)
 
 
-class Rooms(db.Model):
-    __table_name__ = "Rooms"
-    __table_args__ = {"schema": "gym"}
-
-    id = db.Column("id", ID_TYPE, primary_key=True)
-    description = db.Column("description", db.String(50))
-
-
 class Reservations(db.Model):
     __table_name__ = "Reservations"
     __table_args__ = (
-        UniqueConstraint("room", "date", "time"),
+        UniqueConstraint("date", "time"),
         {"schema": "gym"}
     )
 
@@ -117,7 +109,6 @@ class Reservations(db.Model):
     date = db.Column("date", db.Date, default=func.now())#TODO capire se bisogna eliminare lo schema a db e riinizializzarlo con flask perche non funziona now()
     time = db.Column("time", db.Time, default=func.now())
     customer = db.Column("customer", ID_TYPE, db.ForeignKey(Users.id), nullable=False)
-    room = db.Column("room", ID_TYPE, db.ForeignKey(Rooms.id), nullable=False)
 
 
 class Lessons(db.Model):
@@ -166,7 +157,7 @@ class LessonReservation(db.Model):
     __table_args__ = (UniqueConstraint("lesson", "reservation_id"), {"schema": "gym"})
 
     participant_number = db.Column("participant_number", db.Integer, primary_key=True)
-    reservation_id = db.Column("reservation_id", ID_TYPE, db.ForeignKey("gym.reservations.id"),
+    reservation_id = db.Column("reservation_id", ID_TYPE, db.ForeignKey(Reservations.id),
                                primary_key=True, nullable=False)
     lesson = db.Column("lesson", ID_TYPE, db.ForeignKey(Lessons.id), nullable=False)
 

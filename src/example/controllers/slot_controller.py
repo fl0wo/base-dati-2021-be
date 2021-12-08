@@ -62,20 +62,17 @@ def add_course(request):
 def slot_add_reservation(user, request):
     body = request.get_json()
     # database.begin_transaction() ---> sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Session.
-    # TODO Cercare di capire come evitare sql injections, o facciamo dei controlli sul parametro oppure bisogna cambiare modo di fare le query
     db_is_space = database.check_if_space_for_slot_reservation(body['idSlot'])
-    is_space = db_is_space[0]['there_is_space']  # TODO IVAN Controlla se sta roba funziona
-    if is_space == 0:
+    print(db_is_space)
+    if not db_is_space:
         return None
 
     reservation_id = str(uuid.uuid4())
     database.add_instance_no_commit(Reservations,
                                     id=reservation_id,
-                                    customer=body['idUser'],
-                                    room='1')
+                                    customer=body['idUser'])
     database.add_instance_no_commit(WeightRoomReservations,
                                     reservation_number=999,
-                                    # FIXME TODO: MANDARGLI DA FRONT END/ fare query qui x prendersi il progressivo della reservation x quel determinato slot oppure eliminare il campo perche non viene mai usato
                                     reservation_id=reservation_id,
                                     slot=(body['idSlot']))
     database.commit_changes()
@@ -85,20 +82,19 @@ def slot_add_reservation(user, request):
 def lesson_add_reservation(user, request):
     body = request.get_json()
     # database.begin_transaction() ---> sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Session.
-    # TODO Cercare di capire come evitare sql injections, o facciamo dei controlli sul parametro oppure bisogna cambiare modo di fare le query
-    db_is_space = database.check_if_space_for_lesson_reservation(body['idSlot'])
-    is_space = db_is_space[0]['there_is_space']  # TODO IVAN Controlla se sta roba funziona
-    if is_space == 0:
+    db_is_space = database.check_if_space_for_lesson_reservation(body['idLesson'])
+    print(db_is_space)
+    print(user.id+"----"+body['idUser'])
+    if not db_is_space:
         return None
 
     reservation_id = str(uuid.uuid4())
-    database.add_instance_no_commit(Reservations,
+    database.add_instance(Reservations,
                                     id=reservation_id,
-                                    customer=user.id,
-                                    room='1')
-    database.add_instance_no_commit(LessonReservation,
+                                    customer=body['idUser'])
+    database.add_instance(LessonReservation,
                                     participant_number=999,
-                                    # FIXME TODO: MANDARGLI DA FRONT END/ fare query qui x prendersi il progressivo della reservation x quel determinato slot oppure eliminare il campo perche non viene mai usato
                                     reservation_id=reservation_id,
                                     lesson=(body['idLesson']))
+
     database.commit_changes()
