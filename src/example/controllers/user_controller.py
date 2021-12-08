@@ -4,6 +4,7 @@ from datetime import datetime
 from ..response import Response, DATE_FORMAT, DATE_FORMAT_IN, TIME_FORMAT
 from ..utils.dateutils import format_date
 
+
 def parse_me(user: Users):
     return {
         "name": user.name,
@@ -41,6 +42,7 @@ def parse_my_res(user):
         })
     return subscription_data
 
+
 def users_all():
     db_users = database.get_all(Users)
     users = []
@@ -55,21 +57,22 @@ def users_all():
         })
     return users
 
+
 def users_trainers_all():
-    db_users = database.get_all(Users)
+    db_trainers = database.get_by_role(Users,'trainer')
     users = []
-    for user in db_users:
-        if user.role == 'trainer':
-            users.append({
-                "name": user.name,
-                "surname": user.surname,
-                "role": user.role,
-                "email": user.email,
-                "birth_date": format_date(user.birth_date),
-                "fiscal_code": user.fiscal_code,
-                "id": user.id
-            })
+    for user in db_trainers:
+        users.append({
+            "name": user.name,
+            "surname": user.surname,
+            "role": user.role,
+            "email": user.email,
+            "birth_date": format_date(user.birth_date),
+            "fiscal_code": user.fiscal_code,
+            "id": user.id
+        })
     return users
+
 
 def courses_all():
     db_courses = database.get_all(Courses)

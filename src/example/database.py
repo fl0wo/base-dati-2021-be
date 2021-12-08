@@ -40,6 +40,10 @@ def get_by_id(model, id):
     data = model.query.filter_by(id=id).first()
     return data
 
+def get_by_role(model, role):
+    data = model.query.filter_by(role=role).all()
+    return data
+
 
 def get_by_email(model, email):
     data = model.query.filter_by(email=email).first()
