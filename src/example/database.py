@@ -14,6 +14,10 @@ def add_instance(model, **kwargs):
     commit_changes()
 
 
+def flush():
+    db.session.flush()
+
+
 def add_instance_no_commit(model, **kwargs):
     instance = model(**kwargs)
     db.session.add(instance)
