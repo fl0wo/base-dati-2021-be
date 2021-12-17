@@ -57,10 +57,11 @@ GRANT DELETE, INSERT, UPDATE, SELECT ON TABLE "gym".policies TO manager;
 --Users
 GRANT DELETE, INSERT, UPDATE, SELECT ON TABLE "gym".users TO customer;
 GRANT DELETE, INSERT, UPDATE, SELECT ON TABLE "gym".users TO trainer;
-GRANT SELECT ON TABLE "gym".users TO machine;--cosi riesce a gestire le Transaction, sa gia che l'abbon. è valido perche si trova oltre il varco della palestra
+GRANT SELECT ON TABLE "gym".users TO machine;
 GRANT DELETE, INSERT, UPDATE, SELECT ON TABLE "gym".users TO manager;
 
 --Subscriptions
+GRANT SELECT ON TABLE "gym".subscriptions TO machine;
 GRANT UPDATE, SELECT ON TABLE "gym".subscriptions TO customer;
 GRANT UPDATE, SELECT ON TABLE "gym".subscriptions TO trainer;
 GRANT DELETE, INSERT, UPDATE, SELECT ON TABLE "gym".subscriptions TO manager;
