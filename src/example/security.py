@@ -32,8 +32,7 @@ def get_current_user(request):
         token = get_token(request.headers)
         data = jwt.decode(token, config.secret)
         return get_by_id(Users, data['id'])
-    except:
-        return None
+    except: return None
 
 
 def is_logged(request):
@@ -106,7 +105,6 @@ def register_user(data):
                           name=data['name'],
                           surname=data['surname'],
                           role=CUSTOMER)
-
     database.add_instance(Subscriptions,
                           id=str(uuid.uuid4()),
                           cur_balance=0,

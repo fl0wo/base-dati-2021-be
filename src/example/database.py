@@ -5,15 +5,39 @@ from sqlalchemy import bindparam, String
 from datetime import datetime, timedelta
 
 
+def begin_transaction():
+    db.session.begin()
+
+def commit_changes():
+    db.session.commit()
+
+def rollback_changes():
+    db.session.rollback()
+
 def get_all(model):
     data = model.query.all()
     return data
 
 
 def add_instance(model, **kwargs):
-    instance = model(**kwargs)
-    db.session.add(instance)
-    commit_changes()
+    try:
+        #begin_transaction()
+        instance = model(**kwargs)
+        db.session.add(instance)
+        commit_changes()
+    except Exception as e:
+        rollback_changes()
+        print(e)
+        raise e
+
+
+def delete_instance(model, id):
+    try:
+        begin_transaction()
+        model.query.filter_by(id=id).delete()
+        commit_changes()
+    except:
+        rollback_changes()
 
 
 def flush():
@@ -23,11 +47,6 @@ def flush():
 def add_instance_no_commit(model, **kwargs):
     instance = model(**kwargs)
     db.session.add(instance)
-
-
-def delete_instance(model, id):
-    model.query.filter_by(id=id).delete()
-    commit_changes()
 
 
 def edit_instance(model, id, **kwargs):
@@ -50,14 +69,6 @@ def get_by_role(model, role):
 def get_by_email(model, email):
     data = model.query.filter_by(email=email).first()
     return data
-
-
-def begin_transaction():
-    db.session.begin()
-
-
-def commit_changes():
-    db.session.commit()
 
 
 def get_all_slots_curent_reservation():
@@ -98,7 +109,7 @@ def get_all_lessons_curent_reservation():
 
 def get_all_accesses(userId):
     data = Accesses.query.filter_by(user=userId).all()
-    return data;
+    return data
 
 def get_current_policy():
     todays_datetime = datetime(datetime.today().year, datetime.today().month, datetime.today().day)

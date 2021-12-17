@@ -1,4 +1,4 @@
---Controllo che la riga in Courses punti sempre a un trainer e mai a un user o admin
+
 CREATE OR REPLACE FUNCTION "gym".is_trainer_fun() RETURNS trigger AS $$
 
 DECLARE
@@ -26,7 +26,6 @@ EXECUTE FUNCTION "gym".is_trainer_fun();
 
 
 
---Controlla che le prenotazioni per sala pesi non siano al limite per un detterminato slot
 CREATE OR REPLACE FUNCTION "gym".is_slot_full_fun() RETURNS trigger AS $$
 
 DECLARE
@@ -58,7 +57,7 @@ BEFORE INSERT OR UPDATE ON "gym".weight_room_reservations
 FOR EACH ROW
 EXECUTE FUNCTION "gym".is_slot_full_fun();
 
---Controlla che le prenotazioni per le lezioni non siano al limite per una detterminata lezione
+
 CREATE OR REPLACE FUNCTION "gym".is_lesson_full_fun() RETURNS trigger AS $$
 
 DECLARE
@@ -92,7 +91,6 @@ EXECUTE FUNCTION "gym".is_lesson_full_fun();
 
 
 
--- Controlla che l'abbonamento sia valido quando si fa un accesso
 CREATE OR REPLACE FUNCTION "gym".check_subscription()
 RETURNS trigger AS $$
 
@@ -101,7 +99,7 @@ DECLARE
 
 BEGIN
     SELECT * INTO subscription
-    FROM "gym".subscription s
+    FROM "gym".subscriptions s
     WHERE s.user = NEW.user;
 
     IF subscription.start_date < NOW() AND subscription.end_date > NOW() THEN

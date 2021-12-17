@@ -9,7 +9,6 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
 def upload_file(user_id):
     if 'file' not in request.files:
         return '1'
@@ -21,7 +20,6 @@ def upload_file(user_id):
         filename = secure_filename(file_upd) + "." + file.filename.rsplit('.', 1)[1].lower()
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         return 'True'
-
 
 def download_profilepic(id):
     for ext in ALLOWED_EXTENSIONS:

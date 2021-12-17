@@ -26,13 +26,12 @@ def parse_slots():
 
 def add_slot(request):
     body = request.get_json()
-    # TODO: check that timefrom < timeto
     database.add_instance(Slots,
                           id=str(uuid.uuid4()),
                           date=body['date'],
                           time_from=body['time_from'],
                           time_to=body['time_to'],
-                          max_capacity=body['max_capacity'],  # TODO: check if > 1
+                          max_capacity=body['max_capacity'],
                           title=body['title'],
                           description=body['description'],
                           )
