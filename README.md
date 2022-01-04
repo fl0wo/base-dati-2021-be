@@ -10,6 +10,8 @@
   <h1 align="center">Gym App</h3>
 </div>
 
+Relative client-side project can be found [here](https://github.com/fl0wo/gym-app-fe)
+
 <!-- TABLE OF CONTENTS -->
 <details>
   <summary>Table of Contents</summary>
